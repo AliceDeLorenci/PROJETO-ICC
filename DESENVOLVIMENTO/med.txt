@@ -1,0 +1,72 @@
+#1
+Remedio Um
+Histamina
+mL
+15.000000
+120.000000
+0 1 0 1 0 1 0 
+12:0 14:0 
+#2
+Remedio de pressao
+Dipirona
+comprimido
+2.000000
+40.000000
+1 1 1 1 1 1 1 
+8:00
+#3
+Antialegico
+Sigmaliv
+spray
+2.000000
+20.000000
+1 1 1 1 1 1 1 
+8:0 16:0 
+#4
+Rmedio para tireoide
+Sei la
+unidade
+1.000000
+50.000000
+0 0 1 0 1 0 0 
+9:0 15:0 
+#5
+Antibiotico Faringite
+Nao sei
+mL
+20.000000
+200.000000
+1 1 1 1 1 1 1 
+10:0 12:0 24:0 
+#6
+asdfgh
+sdfghj
+comprimido
+12.000000
+145.000000
+1 1 1 1 1 1 1 
+13:15 
+#7
+LSGAUDKJEF JA
+LIADG UIDGSVLS
+spray
+4.000000
+100.000000
+1 0 0 0 0 0 0 
+24:30 12:30 23:67 23:67 
+#8
+teste
+horario
+mL
+3.000000
+3.000000
+0 1 0 0 0 0 0 
+25:1 
+#9
+novo teste
+denovo
+mL
+12.000000
+45.000000
+1 1 1 0 0 0 0 
+10:30 23:69 14:35 
