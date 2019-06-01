@@ -1,0 +1,32 @@
+#1
+Remedio Um
+Histamina
+mL
+15.000000
+120.000000
+0 1 0 1 0 1 0 
+12:0 14:0 
+#2
+Remedio de pressao
+Dipirona
+comprimido
+2.000000
+40.000000
+1 1 1 1 1 1 1 
+8:00
+#3
+Antialegico
+Sigmaliv
+spray
+2.000000
+20.000000
+1 1 1 1 1 1 1 
+8:0 16:0 
+#4
+Alivium
+Alivium
+unidade
+20.000000
+120.000000
+1 1 1 1 1 1 1 
+8:30 

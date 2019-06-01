@@ -1,0 +1,41 @@
+#1
+nome
+comercial
+1.000000 comprimido(s)
+20.000000
+#1
+nome
+com
+10.000000 mL
+120.000000
+#1
+#1
+a
+d
+4.000000 spray(s)
+34.000000
+#1
+no
+com
+3.000000 comprimido(s)
+60.000000
+#1
+aspirina
+bia
+1.000000 comprimido(s)
+60.000000
+#1
+adx
+asdf
+0.000000 comprimido(s)
+#1
+#1
+sad
+adsf
+1.000000 comprimido(s)
+5.000000
+#1
+alice
+alice
+20.000000 mL
+120.000000
