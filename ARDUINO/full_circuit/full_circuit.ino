@@ -1,30 +1,94 @@
 // Programa: Relogio com modulo DS3231 e LCD 16x2
 
- 
+/******************* RTC *********************/
 #include "Wire.h"
-#include <LiquidCrystal.h>
- 
 #define DS1307_ADDRESS 0x68
- 
-// Inicializa o LCD
-LiquidCrystal lcd(12, 11, 8, 7, 4, 2);
- 
 byte zero = 0x00; 
+/********************************************/
  
+
+
+/******************* LCD ********************/
+#include <LiquidCrystal.h>
+// Inicializa o LCD
+int rs = 12, e = 11, d4 = 8, d5 = 7, d6 = 4, d7 = 2;
+LiquidCrystal lcd(rs, e, d4, d5, d6, d7);
+/********************************************/
+ 
+
+/******************* RGB ********************/
+#define red 10
+#define green 9
+#define blue 6
+/********************************************/
+
+#define BUT 5
+#define BUZ 3
+
+int segundos, minutos, horas, diadasemana, diadomes, mes, ano;
+
 void setup()
 {
  // Define o LCD com 16 colunas e 2 linhas
  lcd.begin(16, 2);
+ 
  Wire.begin();
+ 
  Serial.begin(9600);
+ 
  // A linha abaixo pode ser retirada apos setar a data e hora
  // SelecionaDataeHora(); 
+
+ pinMode(red,OUTPUT);
+ pinMode(green,OUTPUT);
+ pinMode(blue,OUTPUT);
+ pinMode(BUT,INPUT);
+ pinMode(BUZ,OUTPUT);
 }
  
 void loop()
 {
  Mostrarelogio();
+ Cores();
+ Button();
+ 
  delay(1000);
+}
+
+void Cores(){
+  if(segundos%4 == 0){
+    RGB_color(0, 255, 199);  //azul
+    analogWrite(BUZ,500);
+  }
+  if(segundos%4 == 1){
+    RGB_color(230, 3, 94);  //magenta
+    analogWrite(BUZ,1000);
+  }
+  if(segundos%4 == 2){
+    RGB_color(0, 255, 0);  //verde 
+    analogWrite(BUZ,200);
+  }
+  if(segundos%4 == 3){
+    RGB_color(255, 0, 0);   //vermelho
+    analogWrite(BUZ,0);
+  }
+    
+}
+
+void Button(){
+  if(digitalRead(BUT) == 1){
+    Serial.println("BUT 1");
+  }
+  if(digitalRead(BUT) == 0){
+    Serial.println("BUT 0");
+  }
+}
+
+void RGB_color(int red_light_value, int green_light_value, int blue_light_value)
+ {
+  analogWrite(red, red_light_value);
+  analogWrite(green, green_light_value);
+  analogWrite(blue, blue_light_value);
 }
  
 void SelecionaDataeHora() // Seta a data e a hora do DS1307
@@ -71,13 +135,13 @@ void Mostrarelogio()
  Wire.write(zero);
  Wire.endTransmission();
  Wire.requestFrom(DS1307_ADDRESS, 7);
- int segundos = ConverteparaDecimal(Wire.read());
- int minutos = ConverteparaDecimal(Wire.read());
- int horas = ConverteparaDecimal(Wire.read() & 0b111111); 
- int diadasemana = ConverteparaDecimal(Wire.read()); 
- int diadomes = ConverteparaDecimal(Wire.read());
- int mes = ConverteparaDecimal(Wire.read());
- int ano = ConverteparaDecimal(Wire.read());
+ segundos = ConverteparaDecimal(Wire.read());
+ minutos = ConverteparaDecimal(Wire.read());
+ horas = ConverteparaDecimal(Wire.read() & 0b111111); 
+ diadasemana = ConverteparaDecimal(Wire.read()); 
+ diadomes = ConverteparaDecimal(Wire.read());
+ mes = ConverteparaDecimal(Wire.read());
+ ano = ConverteparaDecimal(Wire.read());
  
  // Mostra a hora atual no display
  lcd.setCursor(0, 0);
