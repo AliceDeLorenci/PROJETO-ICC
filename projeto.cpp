@@ -6,9 +6,7 @@
 /***********************************************************************************************
  * O QUE FOI FEITO
  * 
- * interface de interacao com o usuario pronta
- * 
- * remove medicamento
+ * versao em C++ para poder usar GTK
  * 
  * PESQUISAR: busca de palavras
  * https://www.codingunit.com/c-tutorial-searching-for-strings-in-a-text-file

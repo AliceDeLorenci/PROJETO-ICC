@@ -6,9 +6,7 @@
 /***********************************************************************************************
  * O QUE FOI FEITO
  * 
- * interface de interacao com o usuario pronta
- * 
- * remove medicamento
+ * ultima versao em C
  * 
  * PESQUISAR: busca de palavras
  * https://www.codingunit.com/c-tutorial-searching-for-strings-in-a-text-file
