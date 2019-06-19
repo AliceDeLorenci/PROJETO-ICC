@@ -3,17 +3,10 @@
 #include <string.h>
 #include <stdbool.h>
 
+
 /***********************************************************************************************
- * O QUE FOI FEITO
  * 
- * versao em C++ para poder usar GTK
- * 
- * PESQUISAR: busca de palavras
- * https://www.codingunit.com/c-tutorial-searching-for-strings-in-a-text-file
- * https://linux.ime.usp.br/~lucasmmg/livecd/documentacao/documentos/mac122/strma.html
- * http://www-igm.univ-mlv.fr/%7Elecroq/string/node14.html#SECTION00140
- * https://www.ime.usp.br/~pf/algoritmos/aulas/strma.html
- * 
+ * VERSAO EM C++ PARA IMPLEMENTAR O GTK
  * 
 ************************************************************************************************/
 
@@ -32,17 +25,20 @@ struct medicamento
     float quanto;
     //podem ser escolhidos varios horarios...
     //alocacao dinamica..
-    int *hora;  // a medida que forem esolhidos horarios serao alocados mais espacos de memoria...
+    int *hora;  // a medida que forem escolhidos horarios serao alocados mais espacos de memoria...
     int *min;
+    int qh; //quantidade de horarios escolhidos
     int dia[8]; //booleana, 1-7 corresponde aos dias da semana dom-sab
 
 };
 
 struct medicamento med;  //variavel global
 
+struct medicamento *adicionados;   //usada pela funcao Armazenar()
+
 char undd;  //tipo de dosagem
 
-int s;  //size de med.hora e med.min
+int s;  //size de med.hora e med.min do remedio adicionado agora
 
 void GUI();
 
@@ -76,33 +72,13 @@ void Sair (bool *GUIad);
 
 int Busca();
 
-void Arduino();
+//void Arduino();
+
+//int ArmazenarStruct();  
 
 int main(){
 
     GUI();
-
-    //PROBLEMA
-   /*
-   verificar problemas decorrentes da troca de ordem, por exemplo, quanto antes de quantidade
-   */
-
-    /* ver funcionamento do teclado / ASCII estendido / conio.h */
-    /****
-     *  busca em arquivos
-     * ideia:  linha 1 - numero de remedios
-     *         novo remedio  - scanf linha 1  &n
-     *                         "w"  n++
-    */
-
-   /*
-    como editar texto em um ponto especifico?
-
-   */
-  /*
-
- * gerar mensagem de erro para horarios invalidos!
-  */
 
 }
 
@@ -351,7 +327,7 @@ void Dia (){
     printf("Apos escolher todos os dias necessarios, digite 0\n");
 
     for(i=0; i<8; i++){
-        scanf("%d",&tecla);
+        scanf("%1d",&tecla);
         if(tecla == 0){
             break;
         }
@@ -434,7 +410,26 @@ void Salvar (bool *GUIad){
     }
     fprintf(Arq,"\n");
     for(i=0; i<s; i++){
-        fprintf(Arq,"%d:%d ",med.hora[i],med.min[i]);
+        if(i == s-1){
+            if(med.hora[i] < 10 && med.min[i] >= 10)
+                fprintf(Arq,"0%d:%d@",med.hora[i],med.min[i]);
+            if(med.hora[i] >= 10 && med.min[i] < 10)
+                fprintf(Arq,"%d:0%d@",med.hora[i],med.min[i]);
+            if(med.hora[i] < 10 && med.min[i] < 10)
+                fprintf(Arq,"0%d:0%d@",med.hora[i],med.min[i]);
+            if(med.hora[i] >= 10 && med.min[i] >= 10)
+                fprintf(Arq,"%d:%d@",med.hora[i],med.min[i]);
+        }
+        else{
+            if(med.hora[i] < 10 && med.min[i] >= 10)
+                fprintf(Arq,"0%d:%d ",med.hora[i],med.min[i]);
+            if(med.hora[i] >= 10 && med.min[i] < 10)
+                fprintf(Arq,"%d:0%d ",med.hora[i],med.min[i]);
+            if(med.hora[i] < 10 && med.min[i] < 10)
+                fprintf(Arq,"0%d:0%d ",med.hora[i],med.min[i]);
+            if(med.hora[i] >= 10 && med.min[i] >= 10)
+                fprintf(Arq,"%d:%d ",med.hora[i],med.min[i]);
+        }
     }
     fprintf(Arq,"\n");
 
@@ -515,20 +510,6 @@ void Sair (bool *GUIad){
         printf("COMANDO INVALIDO\n\n");
         Sair(GUIad); 
     }
-}
-
-void Arduino(){
-
-    FILE *Ard, *Arq;
-    Arq = fopen(file1,"r");
-    Ard = fopen(arduino,"w+");
-
-    fprintf(Ard,"HELLO");
-    //passar programa pro Arduino...
-
-    fclose(Ard);
-    fclose(Arq);
-
 }
 
 int ListaNumerada (){
@@ -645,4 +626,191 @@ void Remover(int num){
 
     GUIremover();
 
+}
+
+void Arduino(){
+    
+    int count;
+
+    FILE *Ard, *Arq;
+    Arq = fopen(file1,"r");
+    Ard = fopen(arduino,"w+");
+
+    /****************** bibliotecas e variaveis ******************/
+
+    fprintf(Ard,"#include \"Wire.h\"\n");
+    fprintf(Ard,"#define DS1307_ADDRESS 0x68\n");
+    fprintf(Ard,"byte zero = 0x00;\n"); 
+    fprintf(Ard,"\n");
+    fprintf(Ard,"#include <LiquidCrystal.h>\n");
+    fprintf(Ard,"int rs = 12, e = 11, d4 = 8, d5 = 7, d6 = 4, d7 = 2;\n");
+    fprintf(Ard,"LiquidCrystal lcd(rs, e, d4, d5, d6, d7);\n");
+    fprintf(Ard,"\n");
+    fprintf(Ard,"#define red 10\n");
+    fprintf(Ard,"#define green 9\n");
+    fprintf(Ard,"#define blue 6\n");
+    fprintf(Ard,"\n");
+    fprintf(Ard,"#define BUT 5\n");
+    fprintf(Ard,"#define BUZ 3\n");
+    fprintf(Ard,"\n");
+    fprintf(Ard,"byte segundos, minutos, horas, diadasemana, diadomes, mes, ano;\n");
+    fprintf(Ard,"\n");
+
+    /************************ void setup ************************/
+
+    fprintf(Ard,"void setup()\n");
+    fprintf(Ard,"{\n");
+    fprintf(Ard," lcd.begin(16, 2);\n");
+    fprintf(Ard," Wire.begin();\n");
+    fprintf(Ard," Serial.begin(9600);\n");
+    fprintf(Ard,"\n");
+    fprintf(Ard," pinMode(red,OUTPUT);\n");
+    fprintf(Ard," pinMode(green,OUTPUT);\n");
+    fprintf(Ard," pinMode(blue,OUTPUT);\n");
+    fprintf(Ard," pinMode(BUT,INPUT);\n");
+    fprintf(Ard," pinMode(BUZ,OUTPUT);\n");
+    fprintf(Ard,"}\n");
+    fprintf(Ard,"\n");
+
+    
+    count = ArmazenarStruct();  //quantos medicamentos tem
+
+    //TESTE
+    printf("\n%d",count);
+    //printf("%d",adicionados[count-1].dia[7]);
+
+    /************************* void loop *************************/
+
+    //vou usar horas, minutos, diadasemana
+    //pegar horario de 10 em 10 minutos, mostrar todos os remedios desse intervalo
+    //garantir que nao vou perder nem repetir remedio
+
+    //if(minutos%10 == 0)   //e se tiver tanto remedio que ultrapasse 10 min?? RESOLVER DEPOIS!
+
+    fprintf(Ard,"void loop()\n");
+    fprintf(Ard,"{\n");
+    fprintf(Ard," Relogio();\n");
+    
+    fprintf(Ard,"}\n");
+    fprintf(Ard,"\n");
+
+    /******************* funcao que pega horario *******************/
+    fprintf(Ard,"byte ConverteParaBCD(byte val)\n");
+    fprintf(Ard,"{\n");
+    fprintf(Ard," return ( (val/10*16) + (val%%10) );\n");
+    fprintf(Ard,"}\n");
+    fprintf(Ard,"\n ");
+    fprintf(Ard,"byte ConverteparaDecimal(byte val) \n");
+    fprintf(Ard,"{ \n");
+    fprintf(Ard," return ( (val/16*10) + (val%%16) );\n");
+    fprintf(Ard,"}\n");
+    fprintf(Ard,"\n ");
+    fprintf(Ard,"void Relogio()\n");
+    fprintf(Ard,"{\n");
+    fprintf(Ard," Wire.beginTransmission(DS1307_ADDRESS);\n");
+    fprintf(Ard," Wire.write(zero);\n");
+    fprintf(Ard," Wire.endTransmission();\n");
+    fprintf(Ard," Wire.requestFrom(DS1307_ADDRESS, 7);\n");
+    fprintf(Ard," segundos = ConverteparaDecimal(Wire.read());\n");
+    fprintf(Ard," minutos = ConverteparaDecimal(Wire.read());\n");
+    fprintf(Ard," horas = ConverteparaDecimal(Wire.read() & 0b111111);\n"); 
+    fprintf(Ard," diadasemana = ConverteparaDecimal(Wire.read());\n"); 
+    fprintf(Ard," diadomes = ConverteparaDecimal(Wire.read());\n");
+    fprintf(Ard," mes = ConverteparaDecimal(Wire.read());\n");
+    fprintf(Ard," ano = ConverteparaDecimal(Wire.read());\n");
+    fprintf(Ard," }\n");
+    fprintf(Ard,"}\n");
+    fprintf(Ard,"\n");
+
+
+    fclose(Ard);
+    fclose(Arq);
+
+}
+
+int ArmazenarStruct(){
+
+    char busca[50];
+    //char temp[100];
+    char ref = '#';
+    int count = 0;
+    //int s; //size das strings
+
+    adicionados = (medicamento*)malloc(0*sizeof(medicamento));
+
+    FILE *Arq;
+    Arq = fopen(file1,"r");
+
+    while(feof(Arq)==0){ //enquanto nao chegar no fim do arquivo
+        fscanf(Arq,"%s",busca);
+        if(busca[0] == ref){
+            count++;
+            adicionados = (medicamento*)realloc(adicionados,count*sizeof(medicamento));
+            
+            adicionados[count-1].hora = (int*)malloc(0*sizeof(int));
+            adicionados[count-1].min = (int*)malloc(0*sizeof(int));
+            
+
+            fscanf(Arq,"\n");
+            fgets(adicionados[count-1].nomemed,50,Arq);   // adiciona \n ao final da string
+            s = strlen(adicionados[count-1].nomemed);
+            //TESTE!
+            //printf("\nultimo char [%c]",adicionados[count-1].nomemed[s-1]);
+            adicionados[count-1].nomemed[s-1] = ' ';  
+            //printf("\nultimo char [%c]",adicionados[count-1].nomemed[s-1]);
+
+            fscanf(Arq,"\n");
+            fgets(adicionados[count-1].nomecom,50,Arq);  
+            s = strlen(adicionados[count-1].nomemed);
+            adicionados[count-1].nomemed[s-1] = ' ';   //eliminando \n do gets
+
+            fscanf(Arq,"\n");
+            fgets(adicionados[count-1].tipo,50,Arq);  
+            s = strlen(adicionados[count-1].tipo);
+            adicionados[count-1].tipo[s-1] = ' ';  
+
+            fscanf(Arq,"\n");
+            fscanf(Arq,"%f",&adicionados[count-1].qtdd);
+
+            fscanf(Arq,"\n");
+            fscanf(Arq,"%f",&adicionados[count-1].quanto);   
+
+            /****** dias da semana ******/
+            int d;
+            fscanf(Arq,"\n");
+            for(d=1; d<=7; d++){
+                fscanf(Arq,"%1d",&adicionados[count-1].dia[d]);
+            }
+
+            /********* horarios *********/
+
+            fscanf(Arq,"\n");
+            char temp = 'a';
+            int q=0;
+            adicionados[count-1].qh = 0;
+            while(temp != '@'){
+                adicionados[count-1].qh ++;
+                q = adicionados[count-1].qh;
+                adicionados[count-1].hora = (int*)realloc(adicionados[count-1].hora,q*sizeof(int));
+                adicionados[count-1].min = (int*)realloc(adicionados[count-1].min,q*sizeof(int));
+                fscanf(Arq,"%2d",&adicionados[count-1].hora[q-1]);
+                fscanf(Arq,"%c",&temp);  // :
+                fscanf(Arq,"%2d",&adicionados[count-1].min[q-1]);
+                fscanf(Arq,"%c",&temp);  // espaço ou '@'
+            }
+            /** TESTE **
+            printf("\nremedio %s %d: %d",adicionados[count-1].nomemed,count,q);
+            printf("\n%d:%d",adicionados[count-1].hora[q-1],adicionados[count-1].min[q-1]);
+            ***********/
+
+            fscanf(Arq," ");  //se não colocar o programa nao roda...
+            
+            
+        }
+    }
+    
+
+    fclose(Arq);
+
+    return count;
 }
