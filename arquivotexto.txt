@@ -3,7 +3,7 @@ Esse é um modelo que como o arquivo texto que guarda as informções do program
 o funcionamento do Arduino depende das informações serem guardadas exatamente nesse modelo...
 *****************************************************************************************************************************/
 #1
-MEDICAMENTO
+MED
 nome comercial
 mL
 12.000000
