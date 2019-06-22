@@ -13,6 +13,8 @@
  * 
  * Uso do botao para parar alarme
  * 
+ * OBS: as funcoes relacionadas ao Arduino estao comentadas para evitar erros de compilacao
+ *
 ************************************************************************************************/
  
 
@@ -75,17 +77,17 @@ void Sair (bool *GUIad);
 
 int Busca();
 
-void Arduino();
+//void Arduino();
 
-void Tom(int *tom, int i);
+//void Tom(int *tom, int i);
 
-void Cor(int *cor, int i);
+//void Cor(int *cor, int i);
 
-int ArmazenarStruct();  
+//int ArmazenarStruct();  
 
-void GUIUpload();
+//void GUIUpload();
 
-void UploadArduino();
+//void UploadArduino();
 
 int main(){
 
