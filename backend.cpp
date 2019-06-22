@@ -7,13 +7,19 @@
 
 /***********************************************************************************************
  * 
- * Compila programa para Arduino automaticamente
+ * Interage com o usuário por meio do terminal 
+ *
+ * Salva o estado atual do programa em arquivo texto
+ *
+ * Gera codigo para o Arduino (da caixa de medicamentos)
+ *
+ * Compila automaticamente o código do Arduino (usuario nâo precisa abrir Arduino IDE)
+ *
+ * Alarme funciona com cores e sons diferentes para cada medicamento
  * 
- * Alarme com cor/som diferente para cada medicamento
- * 
- * Uso do botao para parar alarme
- * 
- * OBS: as funcoes relacionadas ao Arduino estao comentadas para evitar erros de compilacao
+ * Uso do botão para parar alarme 
+ *
+ * OBS: as funções relacionadas ao Arduino estão comentadas < // >
  *
 ************************************************************************************************/
  
