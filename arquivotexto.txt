@@ -1,0 +1,28 @@
+/*****************************************************************************************************************************
+Esse é um modelo que como o arquivo texto que guarda as informções do programa é salvo,
+o funcionamento do Arduino depende das informações serem guardadas exatamente nesse modelo...
+*****************************************************************************************************************************/
+#1
+MEDICAMENTO
+nome comercial
+mL
+12.000000
+120.000000
+0 0 0 0 0 0 1 
+12:20 12:30 12:40@
+#2
+OUTRO
+xarope
+comprimido
+12.000000
+12.000000
+0 0 0 0 0 0 1 
+12:20 12:30 12:40@
+#3
+remedio pressao
+sigmaliv
+spray
+12.000000
+41.000000
+0 0 0 0 0 0 1 
+13:00@
