@@ -22,7 +22,7 @@ $ sudo apt install libcanberra-gtk-module libcanberra-gtk3-module
 
 COMPILAR ARQUIVO C++:
 
-$ g++ -Wall ultimaversao.cpp -o prog
+$ g++ -Wall backend.cpp -o prog
 
 $ ./prog
 
