@@ -1,30 +1,52 @@
 # PROJETO-ICC
 
-SISTEMA OPERACIONAL: Linux (Ubunto)
+##SISTEMA OPERACIONAL
+
+**Linux** (Ubunto 18.04)
 
 
-INSTALAÇÃO DO GCC NO LINUX UBUNTU:
+##INSTALAÇÕES NECESSÁRIAS
 
-$sudo apt-get install gcc
+###GCC
+
+		~$ sudo apt-get install gcc
 
 
-INSTALAÇÃO DA IDE ARDUINO:
+###ARDUINO IDE
 
 https://www.arduino.cc/en/Guide/Linux
 
+###ARDUINO-MK
 
-INSTALAÇÃO DA BIBLIOTECA GTK:
-
-$ sudo apt-get install libgtk2.0-dev
-
-$ sudo apt install libcanberra-gtk-module libcanberra-gtk3-module
+O programa desenvolvido compila e faz o upload do arquivo .ino gerado automaticamente, sem que o usuário tenha que utilizar a ARDUINO IDE, para isso é necessário instalar o **arduino-mk** 
 
 
-COMPILAR ARQUIVO C++:
+		~$ sudo apt-get install arduino-mk
 
-$ g++ -Wall backend.cpp -o prog
+Que será instalado em:
 
-$ ./prog
+		~$ cd //usr/share/arduino
 
+O funcionamento dessa aplicação depende do arquivo **Makefile** já contido na pasta **DESPREOCUPE-SE/Arduino**
+
+
+###GTK LIBRARY
+
+		~$ sudo apt-get install libgtk2.0-dev
+
+		~$ sudo apt install libcanberra-gtk-module libcanberra-gtk3-module
+
+
+##COMPILAR ARQUIVO C++:
+
+Para que o arquivo seja compilado a pasta **DESPREOCUPE-SE** deve ser salva em **Desktop** caso contrário a função **system()** não funcionará, e o path terá que ser modificado.
+
+Diretivas para compilar o programa a apartir do terminal:
+
+		~$ cd Desktop/DESPREOCUPE-SE
+		
+		~/Desktop/DESPREOCUPE-SE$ g++ -Wall backend.cpp -o prog
+
+		~/Desktop/DESPREOCUPE-SE$ ./prog
 
 
