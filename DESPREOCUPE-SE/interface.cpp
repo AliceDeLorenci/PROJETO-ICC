@@ -565,7 +565,7 @@ void Remover(GtkWidget *button, gpointer window){
 
     grid = gtk_grid_new();
 
-    image = gtk_image_new_from_file("./remmeds.png");
+    image = gtk_image_new_from_file("./images/remmeds.png");
     gtk_grid_attach(GTK_GRID(grid),image,0,0,8,1);
 
     num = ListaRemover(grid,radio,space);
