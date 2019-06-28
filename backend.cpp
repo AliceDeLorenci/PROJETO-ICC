@@ -5,39 +5,6 @@
 #include <ctype.h>
 
 
-/***********************************************************************************************
- * 
- * BACKEND
- * 
- * Interacao com o usuario atraves do terminal
- * 
- * Funcionalidades:
- *  adicionar medicamentos
- *  remover medicamentos
- * 
- * Salva estado do programa no arquivo texto "med.txt" (ver modelo em "arquivotexto.txt")
- * 
- * Gera o código para o Arduino funcionar como um alarme para os medicamentos
- * 
- * Sao definidos sons (para o buzzer) e cores (para o RGB) diferentes para cada medicamento,
- * apartir do seu nome
- * 
- * Programa acessa o terminal para compilar e fazer o upload do programa gerado para o Arduino,
- * sem que o usuario tenha que abrir a Arduino IDE
- * 
- * ARDUINO
- * 
- * Alerta nos horarios dos medicamentos inclui:
- *  mensagem no LCD
- *  LED RGB
- *  buzzer
- * 
- * O usuario pode parar o alarme com um botao
- * 
- * 
-************************************************************************************************/
-  
-
 #define file1 "med.txt"
 #define arduino "./arduino/arduino.ino"
 
@@ -48,11 +15,11 @@ struct medicamento
     char nomemed[50];
     char nomecom[50];
     char tipo[30];
-    float qtdd;
+    int qtdd;
     float quanto;
-    //podem ser escolhidos varios horarios
-    //alocacao dinamica
-    int *hora;  // a medida que forem escolhidos horarios serao alocados mais espacos de memoria
+    //podem ser escolhidos varios horarios...
+    //alocacao dinamica..
+    int *hora;  // a medida que forem escolhidos horarios serao alocados mais espacos de memoria...
     int *min;
     int qh; //quantidade de horarios escolhidos
     int dia[8]; //booleana, 1-7 corresponde aos dias da semana dom-sab
@@ -73,6 +40,8 @@ void Lista();
 
 void GUIadicionar(bool *GUIad);
 
+void Infos(bool *GUIad);
+
 void GUIremover();
 
 int ListaNumerada();
@@ -91,7 +60,7 @@ void Quando (bool *GUIad);
 
 void Dia ();
 
-void Horario ();
+void Horario (int n);
 
 void Salvar(bool *GUIad);
 
@@ -115,6 +84,28 @@ int main(){
 
     GUI();
 
+    //PROBLEMA
+   /*
+   verificar problemas decorrentes da troca de ordem, por exemplo, quanto antes de quantidade
+   */
+
+    /* ver funcionamento do teclado / ASCII estendido / conio.h */
+    /****
+     *  busca em arquivos
+     * ideia:  linha 1 - numero de remedios
+     *         novo remedio  - scanf linha 1  &n
+     *                         "w"  n++
+    */
+
+   /*
+    como editar texto em um ponto especifico?
+
+   */
+  /*
+
+ * gerar mensagem de erro para horarios invalidos!
+  */
+
 }
 
 /* INTERFACE INICIAL */
@@ -122,7 +113,7 @@ void GUI(){
     clear;
 
     char tecla;
-    bool GUIad[]={0,0,0,0,0,0};  //a primeira posicao nao eh relevante, nem eh utilizada, precisa deixar como ZERO!
+    bool GUIad[]={0,0,0,0,1,0};  //a primeira posicao nao eh relevante, nem eh utilizada, precisa deixar como ZERO!
     undd = 0;  //resetar tipo de dosagem para novo medicamento
 
     int i;
@@ -200,6 +191,67 @@ void GUIUpload(){
 
 }
 
+void Infos(bool *GUIad){
+    int i, q = 0, refq = 0;
+
+    char dias[][10]={"domingo","segunda","terca","quarta","quinta","sexta","sabado"};
+    char todosdias[70];
+
+    if(GUIad[1] == 1){
+        printf("Nome do medicamento: %s\n",med.nomemed);
+    }
+    if(GUIad[2] == 1){
+        printf("Nome comercial do medicamento: %s\n",med.nomecom);
+    }
+    if(GUIad[3] == 1){
+        if(med.qtdd == 1)
+            printf("Dosagem: %d %s\n\n",med.qtdd,med.tipo);
+        else
+            printf("Dosagem: %d %ss\n\n",med.qtdd,med.tipo);
+    }
+    if(GUIad[5] == 1){
+        for(i = 1; i <= 7; i++){
+            if(med.dia[i] == 1){
+                q++;
+            }
+        }
+        for(i = 1; i <= 7; i++){
+            if(med.dia[i] == 1){
+                refq++;
+                if(refq == q && q != 1){
+                    strcat(todosdias," e ");
+                    strcat(todosdias,dias[i-1]);
+                    strcat(todosdias,".");
+                }
+                else if (refq == 1 && q != 1){
+                    strcat(todosdias,dias[i-1]);
+                }
+                else if (refq == 1 && q == 1){
+                    strcat(todosdias,dias[i-1]);
+                    strcat(todosdias,".");
+                }
+                else{
+                    strcat(todosdias,", ");
+                    strcat(todosdias,dias[i-1]);
+                }
+            }
+        }
+        /*
+        char *nome;
+        nome = med.nomemed;
+        int s = strlen(nome);
+        nome[s-1] = ' ';
+
+        if(GUIad[1] == 1){
+            printf("O %sdeve ser utilizado %s\n\n",nome,todosdias);
+        }
+        else{*/
+            printf("O medicamento deve ser utilizado %s\n\n",todosdias);
+        //}
+    }
+
+}
+
 /* INTERFACE ADICIONAR */
 void GUIadicionar (bool *GUIad){  
 
@@ -216,8 +268,11 @@ void GUIadicionar (bool *GUIad){
 
     printf("\n\n-----------------------DESPREOCUPE-SE-----------------------\n");
     
+    // Lista as caracteristicas já informadas
+    Infos(GUIad);
+
     if(done != 5)
-        printf("Informe:\n");
+        printf("\nInforme:\n");
 
     if(GUIad[1] == 0)
         printf("1 - Nome do medicamento\n");
@@ -228,7 +283,7 @@ void GUIadicionar (bool *GUIad){
     if(GUIad[4] == 0)
         printf("4 - Quanto do medicamento você tem\n");   /*completar quantidade antes de quanto!!!!*/
     if(GUIad[5] == 0)
-        printf("5 - Quando tomar o medicamento\n");
+        printf("4 - Quando tomar o medicamento\n");
 
     if(done == 5){
         printf("Medicamento incluido com sucesso!!!\n\n");
@@ -259,15 +314,15 @@ void GUIadicionar (bool *GUIad){
             GUIadicionar(GUIad); 
         }
         Quantidade(GUIad);   //a função quantidade chamara GUIadicionar passando o parametro undd
-    }
+    }/*
     else if(tecla == '4'){
         if(GUIad[4] == 1){
             printf("COMANDO INVALIDO\n\n");
             GUIadicionar(GUIad); 
         }
         QuantoTem(GUIad);   //aqui sera utilizado o parametro undd
-    }
-    else if(tecla == '5'){
+    }*/
+    else if(tecla == '4'){
         if(GUIad[5] == 1){
             printf("COMANDO INVALIDO\n\n");
             GUIadicionar(GUIad); 
@@ -352,7 +407,7 @@ void Quantidade (bool *GUIad){
 
     printf("\n\nInforme a dosagem do medicamento: ");   /* quero _____ml, como fazer a entrada ocorrer no ______ ?*/
 
-    scanf("%f",&med.qtdd);
+    scanf("%d",&med.qtdd);
 
     GUIad[3] = 1;
 
@@ -392,7 +447,7 @@ void Quando (bool *GUIad){
     clear;
 
     Dia();
-    Horario();
+    Horario(1);
 
     GUIad[5] = 1;
 
@@ -426,7 +481,8 @@ void Dia (){
     }
 }
 
-void Horario (){
+
+void Horario (int n){
 
     clear;
 
@@ -438,6 +494,9 @@ void Horario (){
     med.min = (int*)calloc(0,sizeof(int));
 
     printf("\n\n-----------------------DESPREOCUPE-SE-----------------------\n");
+    if(n == 0){
+       printf("\nDefina no minimo um horario para o seu medicamento!\n");
+    }
     printf("\n\nInsira os horarios em que o medicamento deve ser consumido\n");
     printf("Insira os horarios no formato .HH:MM\n");  //"." eh usado como referencia
     printf("S - Salvar\n");
@@ -468,6 +527,9 @@ void Horario (){
         med.hora[s-1] = h;
         med.min[s-1] = m;
     }
+    if(s == 0){
+        Horario(0);
+    }
 
 
 }
@@ -496,8 +558,8 @@ void Salvar (bool *GUIad){
     fprintf(Arq,"%s",med.nomemed);  //como foi usado gets, o \0 eh convertido em \n
     fprintf(Arq,"%s",med.nomecom);
     fprintf(Arq,"%s\n",med.tipo);
-    fprintf(Arq,"%f\n",med.qtdd);
-    fprintf(Arq,"%f\n",med.quanto);
+    fprintf(Arq,"%d\n",med.qtdd);
+    //fprintf(Arq,"%f\n",med.quanto);
 
     for(i=1; i<8; i++){
         fprintf(Arq,"%d ",med.dia[i]);
@@ -701,7 +763,7 @@ void Remover(int num){
     while(fgets(buffer,100,Arq) != NULL){   /* usar feof? */
         if(buffer[0] == ref){
             if(strcmp(buffer,fullref)==0){ //se for o medicamento a ser deletado
-                for(i=0; i<8; i++){   // 7 infos por medicamento (nao serao salvos em TEMP, linha 0 a 6) a linha 7 eh do proximo
+                for(i=0; i<7; i++){   // 6 (RETIREI QUANTO) infos por medicamento (nao serao salvos em TEMP, linha 0 a 5) a linha 6 eh do proximo
                     if(fgets(buffer,100,Arq)==NULL){
                         end = 1;
                         break;
@@ -819,8 +881,6 @@ void Arduino(){
 
     //medicamentos verificados de 10 em 10 minutos
 
-    //FUNCAO PARA COR DOS LEDS APARTIR DO NOME
-    //FUNCAO PARA TOM DO BUZZER
 
     fprintf(Ard,"void loop()\n");
     fprintf(Ard,"{\n");
@@ -831,7 +891,7 @@ void Arduino(){
         char nome[50];
         char tipo[50];
 
-        #define button fprintf(Ard,"     if(digitalRead(BUT)==1){\n");fprintf(Ard,"      color(0,0,0);\n");fprintf(Ard,"      analogWrite(BUZ,0);\n");fprintf(Ard,"      lcd.clear();\n");fprintf(Ard,"      break;\n");fprintf(Ard,"     }\n");
+        #define button fprintf(Ard,"     if(digitalRead(BUT)==1){\n");fprintf(Ard,"      color(0,0,0);\n");fprintf(Ard,"      analogWrite(BUZ,0);\n");fprintf(Ard,"      lcd.clear();\n");fprintf(Ard,"      delay(5000);\n");fprintf(Ard,"      break;\n");fprintf(Ard,"     }\n");
 
         for(i=0; i<count; i++){  //PARA CADA REMEDIO
 
@@ -882,10 +942,10 @@ void Arduino(){
                 tipo[j] = toupper(adicionados[i].tipo[j]);
             }
             if(adicionados[i].qtdd == 1){
-                fprintf(Ard,"     lcd.print(\"%.0f %s\");\n",adicionados[i].qtdd, tipo);
+                fprintf(Ard,"     lcd.print(\"%d %s\");\n",adicionados[i].qtdd, tipo);
             }
             else{
-                fprintf(Ard,"     lcd.print(\"%.0f %sS\");\n",adicionados[i].qtdd, tipo);
+                fprintf(Ard,"     lcd.print(\"%d %sS\");\n",adicionados[i].qtdd, tipo);
             }
             int cor[3];
             Cor(cor,i);
@@ -1042,10 +1102,11 @@ int ArmazenarStruct(){
             adicionados[count-1].tipo[s-1] = ' ';*/  
 
             fscanf(Arq,"\n");
-            fscanf(Arq,"%f",&adicionados[count-1].qtdd);
+            fscanf(Arq,"%d",&adicionados[count-1].qtdd);
 
-            fscanf(Arq,"\n");
-            fscanf(Arq,"%f",&adicionados[count-1].quanto);   
+            //RETIREI QUANTO TEM
+            //fscanf(Arq,"\n");
+            //fscanf(Arq,"%f",&adicionados[count-1].quanto);   
 
             /****** dias da semana ******/
             int d;
