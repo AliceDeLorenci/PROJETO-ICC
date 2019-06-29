@@ -1,3 +1,14 @@
+//PROJETO DE ICC
+
+//ORGANIZADOR DE MEDICAMENTOS
+
+//Alice Valenca De Lorenci
+//Jade Bortot De Paiva
+//Marianna
+
+
+
+//BIBLIOTECAS 
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -5,56 +16,58 @@
 #include <ctype.h>
 
 
+//PATHS DOS ARQUIVOS 
 #define file1 "med.txt"
 #define arduino "./arduino/arduino.ino"
 
+
+//foi utilizado o macro para o comando abaixo pois ele é recorrente no programa
 #define clear system("clear");
 
+
+//as informacoes dos medicamentos sao gerenciadas por meio da struct:
 struct medicamento
 {
     char nomemed[50];
     char nomecom[50];
     char tipo[30];
     int qtdd;
-    float quanto;
-    //podem ser escolhidos varios horarios...
-    //alocacao dinamica..
-    int *hora;  // a medida que forem escolhidos horarios serao alocados mais espacos de memoria...
+
+    int *hora; //como podem ser escolhidos varios horarios foi utilizada alocacao dinamica
     int *min;
-    int qh; //quantidade de horarios escolhidos
-    int dia[8]; //booleana, 1-7 corresponde aos dias da semana dom-sab
+    int qh;  //armazena a quantidade de horarios fornecida
+
+    int dia[8]; //booleana ->  1-7 corresponde aos dias da semana dom-sab, a posicao 0 nao eh utilizada
 
 };
 
-struct medicamento med;  //variavel global
+struct medicamento med;  //usada para o medicamento que for adicionado 
 
-struct medicamento *adicionados;   //usada pela funcao Armazenar()
+//usada pela funcao Armazenar() para armazenar todos os medicamentos do arquivo texto
+struct medicamento *adicionados; 
 
-char undd;  //tipo de dosagem
+//tipo de dosagem do medicamento que for adicionado
+char undd;  
 
-int s;  //size de med.hora e med.min do remedio adicionado agora
+//tamanho de med.hora e med.min do medicamento que for adicionado
+int s;  
 
-void GUI();
 
-void Lista();
+void GUI(); // INTERFACE INICIAL
 
-void GUIadicionar(bool *GUIad);
+void Lista(); // listagem dos medicamentos do arquivo texto
 
-void Infos(bool *GUIad);
 
-void GUIremover();
 
-int ListaNumerada();
+void GUIadicionar(bool *GUIad); // INTERFACE PARA ADICIONAR
 
-void Remover(int num);
+void Infos(bool *GUIad); // listagem das infos ja fornecidas
 
 void NomeMed(bool *GUIad);
 
 void NomeCom (bool *GUIad);
 
 void Quantidade (bool *GUIad);
-
-void QuantoTem(bool *GUIad);
 
 void Quando (bool *GUIad);
 
@@ -64,47 +77,38 @@ void Horario (int n);
 
 void Salvar(bool *GUIad);
 
-void Sair (bool *GUIad);
+int Busca();  // informa qual eh o numero do medicamento que for adicionado
 
-int Busca();
+void Sair (bool *GUIad); // sair da INTERFACE ADICIONAR
 
+
+
+void GUIremover(); //INTERFACE REMOVER
+
+int ListaNumerada(); // listagem numerada dos medicamentos do arquivo texto
+
+void Remover(int num);
+
+
+/**** FUNCOES RELACIONADAS AO ARDUINO ****/
 void Arduino();
+
+int ArmazenarStruct();  //armazena todos os medicamentos do arquivo texto (alocacao dinamica)
 
 void Tom(int *tom, int i);
 
 void Cor(int *cor, int i);
 
-int ArmazenarStruct();  
-
 void GUIUpload();
 
 void UploadArduino();
 
+/****************************************/
+
+
 int main(){
 
     GUI();
-
-    //PROBLEMA
-   /*
-   verificar problemas decorrentes da troca de ordem, por exemplo, quanto antes de quantidade
-   */
-
-    /* ver funcionamento do teclado / ASCII estendido / conio.h */
-    /****
-     *  busca em arquivos
-     * ideia:  linha 1 - numero de remedios
-     *         novo remedio  - scanf linha 1  &n
-     *                         "w"  n++
-    */
-
-   /*
-    como editar texto em um ponto especifico?
-
-   */
-  /*
-
- * gerar mensagem de erro para horarios invalidos!
-  */
 
 }
 
@@ -113,7 +117,11 @@ void GUI(){
     clear;
 
     char tecla;
-    bool GUIad[]={0,0,0,0,1,0};  //a primeira posicao nao eh relevante, nem eh utilizada, precisa deixar como ZERO!
+
+    //variavel booleana mantem relacao de quais infos ja foram fornecidas
+    bool GUIad[]={0,0,0,0,1,0};  
+    //a primeira posicao nao eh utilizada, a funcionalidade 5 foi descontinuada
+
     undd = 0;  //resetar tipo de dosagem para novo medicamento
 
     int i;
@@ -130,9 +138,6 @@ void GUI(){
     printf("ESCOLHA O QUE DESEJA FAZER:\n");
     printf("1 - Adicionar medicamento\n");
     printf("2 - Remover medicamento\n");
-    //printf("3 - Editar medicamento\n");
-    /* remover medicamentos 
-        //#posteriores -> #n-1  */
     printf("0 - SALVAR E SAIR\n");
 
     scanf("\n%c",&tecla);
@@ -143,11 +148,6 @@ void GUI(){
     else if(tecla == '2'){
         GUIremover();
     }
-    /*
-    else if(tecla == '3'){
-        printf("\n\nFuncionalidade em desenvolvimento, obrigada pela compreensão :)\n");
-        GUI();
-    }*/
     else if(tecla == '0'){
         Arduino();
         GUIUpload();
@@ -163,33 +163,145 @@ void GUI(){
 
 }
 
-void GUIUpload(){
+void Lista (){
+
+    char busca[50];
+    char nome[50];
+    char comercial[50];
+    char ref = '#';
+    long int snome; //size das strings
+    int end = 0;
+
+
+    FILE *Arq;
+    Arq = fopen(file1,"r");
+
+    while(feof(Arq)==0){
+        end++;
+        fscanf(Arq,"%s",busca);
+        if(busca[0] == ref){
+            fscanf(Arq,"\n");
+            fgets(nome,50,Arq);   // adiciona \n ao final da string
+            snome = strlen(nome);
+            nome[snome-1] = '\0';   //eliminando \n do gets
+            fscanf(Arq,"\n");
+            fgets(comercial,50,Arq);  // adiciona \n ao final da string
+            printf("• %s - %s",nome,comercial); 
+        }
+    }
+    if(end == 1){
+        printf("Nenhum medicamento foi adicionado...\n");
+    }
+
+    fclose(Arq);
+}
+
+
+/* INTERFACE ADICIONAR */
+void GUIadicionar (bool *GUIad){  
 
     clear;
 
     char tecla;
+    int i, done = 0;
 
-    printf("\n\n-----------------------DESPREOCUPE-SE-----------------------\n\n");
-    printf("Se voce deseja atualizar as informacoes no seu organizador:\n");
-    printf("• Conecte o cabo USB do organizador ao seu computador\n\n");
-    printf("1 - Salvar e atualizar organizador\n");
-    printf("2 - Salvar e NAO atualizar organizador\n");
+    for(i=1; i<6; i++){   //avaliar se as opcoes ja foram concluidas
+        if(GUIad[i]==1){
+            done++;
+        }
+    }
+
+    printf("\n\n-----------------------DESPREOCUPE-SE-----------------------\n");
+    
+    // Lista as caracteristicas já informadas
+    Infos(GUIad);
+
+    if(done != 5)
+        printf("\nInforme:\n");
+
+    if(GUIad[1] == 0)
+        printf("1 - Nome do medicamento\n");
+    if(GUIad[2] == 0)
+        printf("2 - Nome comercial do medicamento\n");
+    if(GUIad[3] == 0)
+        printf("3 - Quantidade a ser tomada\n");
+    if(GUIad[5] == 0)
+        printf("4 - Quando tomar o medicamento\n");
+
+    if(done == 5){
+        printf("Medicamento incluido com sucesso!!!\n\n");
+        Salvar(GUIad);
+    }
+
+    printf("V - VOLTAR PARA A TELA INICIAL\n");
 
     scanf("\n%c",&tecla);
 
     if(tecla == '1'){
-        UploadArduino();
+        if(GUIad[1] == 1){ //se essa informacao ja foi fornecida...
+            printf("COMANDO INVALIDO\n\n"); 
+            GUIadicionar(GUIad); 
+        }
+        NomeMed(GUIad);
     }
     else if(tecla == '2'){
-        return;
+        if(GUIad[2] == 1){
+            printf("COMANDO INVALIDO\n\n");
+            GUIadicionar(GUIad); 
+        }
+        NomeCom(GUIad);
+    }
+    else if(tecla == '3'){
+        if(GUIad[3] == 1){
+            printf("COMANDO INVALIDO\n\n");
+            GUIadicionar(GUIad); 
+        }
+        Quantidade(GUIad);   
+    }
+    else if(tecla == '4'){
+        if(GUIad[5] == 1){
+            printf("COMANDO INVALIDO\n\n");
+            GUIadicionar(GUIad); 
+        }
+        Quando(GUIad);
+    }
+    else if((tecla == 'V' || tecla == 'v') && (done == 5)){  //se quiser sair e o medicamento ja foi salvo...
+        GUI();
+        //a funcao GUI ja resetara a variavel booleana
+        //nao ha necessidade de resetar o structs, pois quando um novo med for adicionado, o structs vai ser simplesmente substituido
+        //o struct ja foi salvo no arquivo
+    }
+    else if((tecla == 'V' || tecla == 'v') && (done != 5)){  //se quiser sair e o medicamento nao foi salvo...
+        Sair(GUIad);
+    }
+    else{
+       printf("COMANDO INVALIDO\n\n");
+       GUIadicionar(GUIad); 
+    }
+
+}
+
+void Sair (bool *GUIad){  //caso o usuario tente sair sem fornecer todas as infos necessarias
+
+    clear;
+
+    printf("\n\nSe voce sair agora o novo medicamento nao sera salvo!!\n\n");
+    printf("1 - Voltar para a tela inicial\n");
+    printf("2 - Continuar\n");
+    char tecla2;
+    scanf("\n%c",&tecla2);
+    if(tecla2 == '1'){
+        GUI();
+    }
+    else if(tecla2 == '2'){
+        GUIadicionar(GUIad);
     }
     else{
         printf("COMANDO INVALIDO\n\n");
-        GUIUpload();
+        Sair(GUIad); 
     }
-    
-
 }
+
 
 void Infos(bool *GUIad){
     int i, q = 0, refq = 0;
@@ -236,112 +348,8 @@ void Infos(bool *GUIad){
                 }
             }
         }
-        /*
-        char *nome;
-        nome = med.nomemed;
-        int s = strlen(nome);
-        nome[s-1] = ' ';
-
-        if(GUIad[1] == 1){
-            printf("O %sdeve ser utilizado %s\n\n",nome,todosdias);
-        }
-        else{*/
-            printf("O medicamento deve ser utilizado %s\n\n",todosdias);
-        //}
-    }
-
-}
-
-/* INTERFACE ADICIONAR */
-void GUIadicionar (bool *GUIad){  
-
-    clear;
-
-    char tecla;
-    int i, done = 0;
-
-    for(i=1; i<6; i++){   //avaliar se as opcoes ja foram concluidas
-        if(GUIad[i]==1){
-            done++;
-        }
-    }
-
-    printf("\n\n-----------------------DESPREOCUPE-SE-----------------------\n");
-    
-    // Lista as caracteristicas já informadas
-    Infos(GUIad);
-
-    if(done != 5)
-        printf("\nInforme:\n");
-
-    if(GUIad[1] == 0)
-        printf("1 - Nome do medicamento\n");
-    if(GUIad[2] == 0)
-        printf("2 - Nome comercial do medicamento\n");
-    if(GUIad[3] == 0)
-        printf("3 - Quantidade a ser tomada\n");
-    if(GUIad[4] == 0)
-        printf("4 - Quanto do medicamento você tem\n");   /*completar quantidade antes de quanto!!!!*/
-    if(GUIad[5] == 0)
-        printf("4 - Quando tomar o medicamento\n");
-
-    if(done == 5){
-        printf("Medicamento incluido com sucesso!!!\n\n");
-        Salvar(GUIad);
-    }
-
-    printf("V - VOLTAR PARA A TELA INICIAL\n");
-
-    scanf("\n%c",&tecla);
-
-    if(tecla == '1'){
-        if(GUIad[1] == 1){
-            printf("COMANDO INVALIDO\n\n");
-            GUIadicionar(GUIad); 
-        }
-        NomeMed(GUIad);
-    }
-    else if(tecla == '2'){
-        if(GUIad[2] == 1){
-            printf("COMANDO INVALIDO\n\n");
-            GUIadicionar(GUIad); 
-        }
-        NomeCom(GUIad);
-    }
-    else if(tecla == '3'){
-        if(GUIad[3] == 1){
-            printf("COMANDO INVALIDO\n\n");
-            GUIadicionar(GUIad); 
-        }
-        Quantidade(GUIad);   //a função quantidade chamara GUIadicionar passando o parametro undd
-    }/*
-    else if(tecla == '4'){
-        if(GUIad[4] == 1){
-            printf("COMANDO INVALIDO\n\n");
-            GUIadicionar(GUIad); 
-        }
-        QuantoTem(GUIad);   //aqui sera utilizado o parametro undd
-    }*/
-    else if(tecla == '4'){
-        if(GUIad[5] == 1){
-            printf("COMANDO INVALIDO\n\n");
-            GUIadicionar(GUIad); 
-        }
-        Quando(GUIad);
-    }
-    else if((tecla == 'V' || tecla == 'v') && (done == 5)){  //se quiser sair e o medicamento ja foi salvo...
-        GUI();
-        //observe que a funcao GUI ja reseta a variavel booleana
-        //nao ha necessidade de sesetar o structs, pois quando um novo med for adicionado,
-        //o structs vai ser simplesmente substituido
-        //o struct ja foi salvo no arquivo
-    }
-    else if((tecla == 'V' || tecla == 'v') && (done != 5)){  //se quiser sair e o medicamento ja nao foi salvo...
-        Sair(GUIad);
-    }
-    else{
-       printf("COMANDO INVALIDO\n\n");
-       GUIadicionar(GUIad); 
+        
+        printf("O medicamento deve ser utilizado %s\n\n",todosdias);
     }
 
 }
@@ -388,9 +396,7 @@ void Quantidade (bool *GUIad){
     printf("3 - spray(s)\n");
     printf("4 - outra unidade\n");
 
-    //se houver alguma modificacao nos tipos de dosagem, modificar tambem em QuantoTem()!!!
-
-    scanf("\n%c",&tecla);  //essa informção será utilizada em seguida
+    scanf("\n%c",&tecla);  
 
     if(tecla == '1')
         sprintf(med.tipo,"mL");
@@ -405,7 +411,7 @@ void Quantidade (bool *GUIad){
         Quantidade(GUIad); 
     }
 
-    printf("\n\nInforme a dosagem do medicamento: ");   /* quero _____ml, como fazer a entrada ocorrer no ______ ?*/
+    printf("\n\nInforme a dosagem do medicamento: ");   
 
     scanf("%d",&med.qtdd);
 
@@ -414,32 +420,6 @@ void Quantidade (bool *GUIad){
     undd = tecla;
 
     GUIadicionar(GUIad);
-}
-
-void QuantoTem(bool *GUIad){
-
-    clear;
-
-    printf("\n\n-----------------------DESPREOCUPE-SE-----------------------\n");
-
-    char dosagem [20];
-
-    if(undd == '1')
-        sprintf(dosagem,"mL");
-    if(undd == '2')
-        sprintf(dosagem,"comprimidos");
-    if(undd == '3')
-        sprintf(dosagem,"\"sprays\"");
-    if(undd == '4')
-        sprintf(dosagem,"unidades");
-
-    printf("\n\nInforme quantos %s do medicamento voce possui: ",dosagem);
-    scanf(" %f",&med.quanto);
-
-    GUIad[4] = 1;
-
-    GUIadicionar(GUIad);  
-
 }
 
 void Quando (bool *GUIad){
@@ -501,26 +481,17 @@ void Horario (int n){
     printf("Insira os horarios no formato .HH:MM\n");  //"." eh usado como referencia
     printf("S - Salvar\n");
 
-    //getchar();
 
-    while(1){    //precisa parar em algum momento...
-        getchar();  //ignorar enter
+    while(1){    
+        getchar();  
 
         scanf("%c",&ref);
         if(ref != '.'){
             break;
         }
-        scanf("%d",&h);/*
-        if(h<0 || h>23){
-            printf("HORARIO INVALIDO\n");
-            Horario();
-        }*/
+        scanf("%d",&h);
         getchar(); // ":"
-        scanf("%d",&m);/*
-        if(m<0 || m>59){
-            printf("HORARIO INVALIDO\n");
-            Horario();
-        }*/
+        scanf("%d",&m);
         s++;
         med.hora = (int*)realloc(med.hora,s*sizeof(int));
         med.min = (int*)realloc(med.min,s*sizeof(int));
@@ -554,12 +525,11 @@ void Salvar (bool *GUIad){
         exit(0); 
     }
 
-    fprintf(Arq,"#%d\n",n);  //ID do novo med    /*usar busca para determinar numero do remedio*/
-    fprintf(Arq,"%s",med.nomemed);  //como foi usado gets, o \0 eh convertido em \n
+    fprintf(Arq,"#%d\n",n);  //ID do novo med, foi usado Busca() para determinar n
+    fprintf(Arq,"%s",med.nomemed);  
     fprintf(Arq,"%s",med.nomecom);
     fprintf(Arq,"%s\n",med.tipo);
     fprintf(Arq,"%d\n",med.qtdd);
-    //fprintf(Arq,"%f\n",med.quanto);
 
     for(i=1; i<8; i++){
         fprintf(Arq,"%d ",med.dia[i]);
@@ -620,96 +590,12 @@ int Busca (){
     return n+1; //ja tem n medicamentos, n+1 numero do proximo medicamento (que eh o que vai ser salvo agora)
 }
 
-void Lista (){
-
-    char busca[50];
-    char nome[50];
-    char comercial[50];
-    char ref = '#';
-    long int snome; //size das strings
-    int end = 0;
-
-
-    FILE *Arq;
-    Arq = fopen(file1,"r");
-
-    while(feof(Arq)==0){
-        end++;
-        fscanf(Arq,"%s",busca);
-        if(busca[0] == ref){
-            fscanf(Arq,"\n");
-            fgets(nome,50,Arq);   // adiciona \n ao final da string
-            snome = strlen(nome);
-            nome[snome-1] = '\0';   //eliminando \n do gets
-            fscanf(Arq,"\n");
-            fgets(comercial,50,Arq);  // adiciona \n ao final da string
-            printf("• %s - %s",nome,comercial); 
-        }
-    }
-    if(end == 1){
-        printf("Nenhum medicamento foi adicionado...\n");
-    }
-
-    fclose(Arq);
-}
-
-void Sair (bool *GUIad){
-
-    clear;
-
-    printf("\n\nSe voce sair agora o novo medicamento nao sera salvo!!\n\n");
-    printf("1 - Voltar para a tela inicial\n");
-    printf("2 - Continuar\n");
-    char tecla2;
-    scanf("\n%c",&tecla2);
-    if(tecla2 == '1'){
-        GUI();
-    }
-    else if(tecla2 == '2'){
-        GUIadicionar(GUIad);
-    }
-    else{
-        printf("COMANDO INVALIDO\n\n");
-        Sair(GUIad); 
-    }
-}
-
-int ListaNumerada (){
-    char busca[50];
-    char nome[50];
-    char comercial[50];
-    char ref = '#';
-    int count = 0;
-    long int snome; //size das strings
-
-
-    FILE *Arq;
-    Arq = fopen(file1,"r");
-
-    while(feof(Arq)==0){ //enquanto nao chegar no fim do arquivo
-        fscanf(Arq,"%s",busca);
-        if(busca[0] == ref){
-            count++;
-            fscanf(Arq,"\n");
-            fgets(nome,50,Arq);   // adiciona \n ao final da string
-            snome = strlen(nome);
-            nome[snome-1] = '\0';   //eliminando \n do gets
-            fscanf(Arq,"\n");
-            fgets(comercial,50,Arq);  // adiciona \n ao final da string
-            printf("%d - %s / %s",count,nome,comercial); 
-        }
-    }
-
-    fclose(Arq);
-
-    return count;
-}
 
 void GUIremover(){
 
     clear;
 
-    int tecla1, tecla2;  /*IDEIA: usar string e atoi() para mensagens de erro*/
+    int tecla1, tecla2;  
     int n;
 
     printf("\n\n-----------------------DESPREOCUPE-SE-----------------------\n");
@@ -717,7 +603,7 @@ void GUIremover(){
     n = ListaNumerada();
     printf("0 - VOLTAR PARA A TELA INICIAL\n");
 
-    scanf("\n%d",&tecla1);
+    scanf("\n%d",&tecla1);  //escolher medicamento a ser removido
 
     if(tecla1 == 0){
         GUI();
@@ -745,14 +631,46 @@ void GUIremover(){
 
 }
 
-void Remover(int num){
+
+int ListaNumerada (){
+    char busca[50];
+    char nome[50];
+    char comercial[50];
+    char ref = '#';
+    int count = 0;
+    long int snome; //size das strings
+
+
+    FILE *Arq;
+    Arq = fopen(file1,"r");
+
+    while(feof(Arq)==0){ //enquanto nao chegar no fim do arquivo
+        fscanf(Arq,"%s",busca);
+        if(busca[0] == ref){
+            count++;
+            fscanf(Arq,"\n");
+            fgets(nome,50,Arq);   // adiciona \n ao final da string
+            snome = strlen(nome);
+            nome[snome-1] = '\0';   //eliminando \n do gets
+            fscanf(Arq,"\n");
+            fgets(comercial,50,Arq);  // adiciona \n ao final da string, esse sera mantido
+            printf("%d - %s / %s",count,nome,comercial); 
+        }
+    }
+
+    fclose(Arq);
+
+    return count;
+}
+
+void Remover(int num){ //sera utilizado um arquivo temporario
     char buffer[100];
     int i, end=0;
     int count = 0;
     char ref = '#';
     char fullref[5];
 
-    sprintf(fullref,"#%d\n",num);  //fgets adiciona \n ao final da string
+    sprintf(fullref,"#%d\n",num);  //sera comparado com string obtida com fgets que adiciona \n ao final da string
 
     FILE *Arq;
     FILE *Temp;
@@ -760,10 +678,11 @@ void Remover(int num){
     Arq = fopen(file1,"r");
     Temp = fopen("replace.temp","w+");
 
-    while(fgets(buffer,100,Arq) != NULL){   /* usar feof? */
+    while(fgets(buffer,100,Arq) != NULL){   
         if(buffer[0] == ref){
             if(strcmp(buffer,fullref)==0){ //se for o medicamento a ser deletado
-                for(i=0; i<7; i++){   // 6 (RETIREI QUANTO) infos por medicamento (nao serao salvos em TEMP, linha 0 a 5) a linha 6 eh do proximo
+                for(i=0; i<7; i++){   // 6 infos por medicamento (nao sera salvo em TEMP de 0 a 5), 
+                                      // a info 6 sera do proximo medicamento e ja sera salva em temp
                     if(fgets(buffer,100,Arq)==NULL){
                         end = 1;
                         break;
@@ -793,7 +712,7 @@ void Remover(int num){
 
 }
 
-void Arduino(){
+void Arduino(){ // funcao que gera o codigo .ino
     
     int count;
 
@@ -821,6 +740,7 @@ void Arduino(){
     fprintf(Ard,"\n");
 
     /******************* funcao que pega horario *******************/
+
     fprintf(Ard,"byte ConverteParaBCD(byte val)\n");
     fprintf(Ard,"{\n");
     fprintf(Ard," return ( (val/10*16) + (val%%10) );\n");
@@ -848,6 +768,7 @@ void Arduino(){
     fprintf(Ard,"\n");
 
     /******************* funcao que define cor do RGB *******************/
+
     fprintf(Ard,"void color(int red_light_value, int green_light_value, int blue_light_value)\n");
     fprintf(Ard,"{\n");
     fprintf(Ard,"  analogWrite(red, red_light_value);\n");
@@ -873,13 +794,17 @@ void Arduino(){
     fprintf(Ard,"\n");
 
     
-    count = ArmazenarStruct();  //quantos medicamentos tem
+    count = ArmazenarStruct();  //retorna quantos medicamentos tem
 
     
 
-    /************************* void loop *************************/
-
-    //medicamentos verificados de 10 em 10 minutos
+    /************************* void loop *************************
+     * 
+     * Os medicamentos sao verificados de 10 em 10 minutos, assim todos os medicamentos
+     * pertencentes a um mesmo intervalo de 10 minutos sao alertados consecutivamente.
+     * A verificacao eh realizada de 10 em 10 minutos para reduzir a atividade do Arduino
+     * e para que nenhum medicamento seja omitido, caso, por exemplo, o periodo de alerta
+     * de um medicamento se sobreponha ao horario de outro. */
 
 
     fprintf(Ard,"void loop()\n");
@@ -891,11 +816,12 @@ void Arduino(){
         char nome[50];
         char tipo[50];
 
-        #define button fprintf(Ard,"     if(digitalRead(BUT)==1){\n");fprintf(Ard,"      color(0,0,0);\n");fprintf(Ard,"      analogWrite(BUZ,0);\n");fprintf(Ard,"      lcd.clear();\n");fprintf(Ard,"      delay(5000);\n");fprintf(Ard,"      break;\n");fprintf(Ard,"     }\n");
+        //macro que contem a verificacao se o BOTAO foi ou nao pressionado
+        #define button fprintf(Ard,"     if(digitalRead(BUT)==1){\n");fprintf(Ard,"      color(0,0,0);\n");fprintf(Ard,"      analogWrite(BUZ,0);\n");fprintf(Ard,"      lcd.clear();\n");fprintf(Ard,"      delay(10000);\n");fprintf(Ard,"      break;\n");fprintf(Ard,"     }\n");
 
         for(i=0; i<count; i++){  //PARA CADA REMEDIO
 
-            fprintf(Ard,"  if("); //DIA DA SEMANA
+            fprintf(Ard,"  if("); //TESTAR DIA DA SEMANA
                 tempd = 0;
                 for(d=1; d<=7; d++){
                     if(tempd == 0 && adicionados[i].dia[d] == 1){
@@ -909,7 +835,7 @@ void Arduino(){
                 }
             fprintf(Ard,"){\n");
 
-            fprintf(Ard,"   if("); //HORA E MINUTOS
+            fprintf(Ard,"   if("); //TESTAR HORAS E MINUTOS
                 for(h=0; h < adicionados[i].qh; h++){
                     if(h==0){
                         fprintf(Ard,"(horas == %d && %d >= minutos && %d < minutos+10)",adicionados[i].hora[h],adicionados[i].min[h],adicionados[i].min[h]);
@@ -920,9 +846,9 @@ void Arduino(){
                 }
             fprintf(Ard,"){\n");
 
-            //se esse eh o dia e horario do medicamento, ALARME
+            //se esse eh o dia e horario do medicamento, entao ALARME
             fprintf(Ard,"    int i;\n");
-            fprintf(Ard,"    for(i=0 ; i<5 ; i++){\n");
+            fprintf(Ard,"    for(i=0 ; i<10 ; i++){\n");
             button;
             fprintf(Ard,"     lcd.setCursor(0,0);\n");
 
@@ -972,7 +898,6 @@ void Arduino(){
             fprintf(Ard,"     delay(1000);\n");
             fprintf(Ard,"    }\n"); //END FOR alarme
             fprintf(Ard,"    color(0,0,0);\n");
-            fprintf(Ard,"    delay(3000);\n"); //garantir que a pessoa ja soltou o botao
             fprintf(Ard,"\n");
 
             fprintf(Ard,"   }\n");  //END IF hora e minutos
@@ -980,9 +905,9 @@ void Arduino(){
             fprintf(Ard,"  \n");
 
         }
-        fprintf(Ard," delay(60000);\n"); //delay de 1 min
+        fprintf(Ard," delay(60000);\n"); //delay de 1 minuto, para garantir que esse intervalo de 10 minutos nao seja repetido
 
-        fprintf(Ard," }\n"); //END if(minutos%%10 == 0)
+        fprintf(Ard," }\n"); //END if(minutos%10 == 0)
     fprintf(Ard,"}\n"); //END void loop
     fprintf(Ard,"\n");
 
@@ -991,7 +916,10 @@ void Arduino(){
 
 }
 
-void Tom(int *tom, int i){  //i eh o numero do remedio em questao
+
+//define tons do buzzer diferentes para cada medicamento
+void Tom(int *tom, int i){  
+    //i eh o numero do remedio em questao
 
     int l0,l1,l2,l3;
 
@@ -1031,8 +959,9 @@ void Tom(int *tom, int i){  //i eh o numero do remedio em questao
     }
 }
 
-void Cor(int *cor, int n){ //0 = red, 1 = green, 2 = blue
-    int l0,l1,l2;
+//define cores diferentes para cada medicamento, objetivando uma distribuicao homogenea no espectro do arco iris
+void Cor(int *cor, int n){ 
+    int l0,l1,l2; //0 = red, 1 = green, 2 = blue
     int i,f,q;
     int r,g,b;
     l0 = (int)toupper(adicionados[n].nomecom[0]);
@@ -1063,13 +992,11 @@ void Cor(int *cor, int n){ //0 = red, 1 = green, 2 = blue
 
 }
 
-int ArmazenarStruct(){
+int ArmazenarStruct(){ 
 
     char busca[50];
-    //char temp[100];
     char ref = '#';
     int count = 0;
-    //int s; //size das strings
 
     adicionados = (medicamento*)malloc(0*sizeof(medicamento));
 
@@ -1088,25 +1015,15 @@ int ArmazenarStruct(){
 
             fscanf(Arq,"\n");
             fgets(adicionados[count-1].nomemed,50,Arq);   // adiciona \n ao final da string
-            /*s = strlen(adicionados[count-1].nomemed);
-            adicionados[count-1].nomemed[s-1] = ' '; */
 
             fscanf(Arq,"\n");
             fgets(adicionados[count-1].nomecom,50,Arq);  
-            /*s = strlen(adicionados[count-1].nomemed);
-            adicionados[count-1].nomecom[s-1] = ' ';*/   //eliminando \n do gets
 
             fscanf(Arq,"\n");
             fgets(adicionados[count-1].tipo,50,Arq);  
-            /*s = strlen(adicionados[count-1].tipo);
-            adicionados[count-1].tipo[s-1] = ' ';*/  
 
             fscanf(Arq,"\n");
             fscanf(Arq,"%d",&adicionados[count-1].qtdd);
-
-            //RETIREI QUANTO TEM
-            //fscanf(Arq,"\n");
-            //fscanf(Arq,"%f",&adicionados[count-1].quanto);   
 
             /****** dias da semana ******/
             int d;
@@ -1121,7 +1038,7 @@ int ArmazenarStruct(){
             char temp = 'a';
             int q=0;
             adicionados[count-1].qh = 0;
-            while(temp != '@'){
+            while(temp != '@'){  // '@' indica fim dos horarios
                 adicionados[count-1].qh ++;
                 q = adicionados[count-1].qh;
                 adicionados[count-1].hora = (int*)realloc(adicionados[count-1].hora,q*sizeof(int));
@@ -1131,12 +1048,8 @@ int ArmazenarStruct(){
                 fscanf(Arq,"%2d",&adicionados[count-1].min[q-1]);
                 fscanf(Arq,"%c",&temp);  // espaço ou '@'
             }
-            /** TESTE **
-            printf("\nremedio %s %d: %d",adicionados[count-1].nomemed,count,q);
-            printf("\n%d:%d",adicionados[count-1].hora[q-1],adicionados[count-1].min[q-1]);
-            ***********/
 
-            fscanf(Arq," ");  //se não colocar o programa nao roda...
+            fscanf(Arq," "); 
             
             
         }
@@ -1146,6 +1059,35 @@ int ArmazenarStruct(){
     fclose(Arq);
 
     return count;
+}
+
+
+void GUIUpload(){  //interface para upload do codigo do Arduino
+
+    clear;
+
+    char tecla;
+
+    printf("\n\n-----------------------DESPREOCUPE-SE-----------------------\n\n");
+    printf("Se voce deseja atualizar as informacoes no seu organizador:\n");
+    printf("• Conecte o cabo USB do organizador ao seu computador\n\n");
+    printf("1 - Salvar e atualizar organizador\n");
+    printf("2 - Salvar e NAO atualizar organizador\n");
+
+    scanf("\n%c",&tecla);
+
+    if(tecla == '1'){
+        UploadArduino();
+    }
+    else if(tecla == '2'){
+        return;
+    }
+    else{
+        printf("COMANDO INVALIDO\n\n");
+        GUIUpload();
+    }
+    
+
 }
 
 void UploadArduino(){

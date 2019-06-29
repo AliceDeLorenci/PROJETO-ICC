@@ -64,6 +64,234 @@ void loop()
 {
  Relogio();
  if(minutos%10 == 0){
+  if(diadasemana == 5){
+   if((horas == 15 && 30 >= minutos && 30 < minutos+10)){
+    int i;
+    for(i=0 ; i<10 ; i++){
+     if(digitalRead(BUT)==1){
+      color(0,0,0);
+      analogWrite(BUZ,0);
+      lcd.clear();
+      delay(10000);
+      break;
+     }
+     lcd.setCursor(0,0);
+     lcd.print("REMEDIO PARA DOR");
+     lcd.setCursor(0,1);
+     lcd.print("2 COMPRIMIDOS");
+     color(0,255,0);
+     analogWrite(BUZ,9640);
+     if(digitalRead(BUT)==1){
+      color(0,0,0);
+      analogWrite(BUZ,0);
+      lcd.clear();
+      delay(10000);
+      break;
+     }
+     delay(500);
+     analogWrite(BUZ,409);
+     if(digitalRead(BUT)==1){
+      color(0,0,0);
+      analogWrite(BUZ,0);
+      lcd.clear();
+      delay(10000);
+      break;
+     }
+     delay(500);
+     analogWrite(BUZ,8000);
+     if(digitalRead(BUT)==1){
+      color(0,0,0);
+      analogWrite(BUZ,0);
+      lcd.clear();
+      delay(10000);
+      break;
+     }
+     delay(500);
+     analogWrite(BUZ,304);
+     if(digitalRead(BUT)==1){
+      color(0,0,0);
+      analogWrite(BUZ,0);
+      lcd.clear();
+      delay(10000);
+      break;
+     }
+     delay(500);
+     analogWrite(BUZ,0);
+     if(digitalRead(BUT)==1){
+      color(0,0,0);
+      analogWrite(BUZ,0);
+      lcd.clear();
+      delay(10000);
+      break;
+     }
+     delay(2000);
+     lcd.clear();
+     if(digitalRead(BUT)==1){
+      color(0,0,0);
+      analogWrite(BUZ,0);
+      lcd.clear();
+      delay(10000);
+      break;
+     }
+     delay(1000);
+    }
+    color(0,0,0);
+
+   }
+  }
+  
+  if(diadasemana == 0){
+   if((horas == 15 && 30 >= minutos && 30 < minutos+10) || (horas == 16 && 0 >= minutos && 0 < minutos+10) || (horas == 18 && 0 >= minutos && 0 < minutos+10)){
+    int i;
+    for(i=0 ; i<10 ; i++){
+     if(digitalRead(BUT)==1){
+      color(0,0,0);
+      analogWrite(BUZ,0);
+      lcd.clear();
+      delay(10000);
+      break;
+     }
+     lcd.setCursor(0,0);
+     lcd.print("ANTIALERGICO");
+     lcd.setCursor(0,1);
+     lcd.print("4 COMPRIMIDOS");
+     color(255,0,255);
+     analogWrite(BUZ,304);
+     if(digitalRead(BUT)==1){
+      color(0,0,0);
+      analogWrite(BUZ,0);
+      lcd.clear();
+      delay(10000);
+      break;
+     }
+     delay(500);
+     analogWrite(BUZ,10340);
+     if(digitalRead(BUT)==1){
+      color(0,0,0);
+      analogWrite(BUZ,0);
+      lcd.clear();
+      delay(10000);
+      break;
+     }
+     delay(500);
+     analogWrite(BUZ,430);
+     if(digitalRead(BUT)==1){
+      color(0,0,0);
+      analogWrite(BUZ,0);
+      lcd.clear();
+      delay(10000);
+      break;
+     }
+     delay(500);
+     analogWrite(BUZ,7700);
+     if(digitalRead(BUT)==1){
+      color(0,0,0);
+      analogWrite(BUZ,0);
+      lcd.clear();
+      delay(10000);
+      break;
+     }
+     delay(500);
+     analogWrite(BUZ,0);
+     if(digitalRead(BUT)==1){
+      color(0,0,0);
+      analogWrite(BUZ,0);
+      lcd.clear();
+      delay(10000);
+      break;
+     }
+     delay(2000);
+     lcd.clear();
+     if(digitalRead(BUT)==1){
+      color(0,0,0);
+      analogWrite(BUZ,0);
+      lcd.clear();
+      delay(10000);
+      break;
+     }
+     delay(1000);
+    }
+    color(0,0,0);
+
+   }
+  }
+  
+  if(diadasemana == 2 || diadasemana == 3){
+   if((horas == 16 && 0 >= minutos && 0 < minutos+10) || (horas == 19 && 0 >= minutos && 0 < minutos+10) || (horas == 21 && 0 >= minutos && 0 < minutos+10)){
+    int i;
+    for(i=0 ; i<10 ; i++){
+     if(digitalRead(BUT)==1){
+      color(0,0,0);
+      analogWrite(BUZ,0);
+      lcd.clear();
+      delay(10000);
+      break;
+     }
+     lcd.setCursor(0,0);
+     lcd.print("REMEDIO DE PRESSAO");
+     lcd.setCursor(0,1);
+     lcd.print("3 COMPRIMIDOS");
+     color(0,255,255);
+     analogWrite(BUZ,8200);
+     if(digitalRead(BUT)==1){
+      color(0,0,0);
+      analogWrite(BUZ,0);
+      lcd.clear();
+      delay(10000);
+      break;
+     }
+     delay(500);
+     analogWrite(BUZ,295);
+     if(digitalRead(BUT)==1){
+      color(0,0,0);
+      analogWrite(BUZ,0);
+      lcd.clear();
+      delay(10000);
+      break;
+     }
+     delay(500);
+     analogWrite(BUZ,10250);
+     if(digitalRead(BUT)==1){
+      color(0,0,0);
+      analogWrite(BUZ,0);
+      lcd.clear();
+      delay(10000);
+      break;
+     }
+     delay(500);
+     analogWrite(BUZ,357);
+     if(digitalRead(BUT)==1){
+      color(0,0,0);
+      analogWrite(BUZ,0);
+      lcd.clear();
+      delay(10000);
+      break;
+     }
+     delay(500);
+     analogWrite(BUZ,0);
+     if(digitalRead(BUT)==1){
+      color(0,0,0);
+      analogWrite(BUZ,0);
+      lcd.clear();
+      delay(10000);
+      break;
+     }
+     delay(2000);
+     lcd.clear();
+     if(digitalRead(BUT)==1){
+      color(0,0,0);
+      analogWrite(BUZ,0);
+      lcd.clear();
+      delay(10000);
+      break;
+     }
+     delay(1000);
+    }
+    color(0,0,0);
+
+   }
+  }
+  
  delay(60000);
  }
 }

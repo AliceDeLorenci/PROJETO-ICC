@@ -1,3 +1,19 @@
+//PROJETO DE ICC
+
+//ORGANIZADOR DE MEDICAMENTOS
+
+//Alice Valenca De Lorenci
+//Jade Bortot De Paiva
+//Marianna 
+
+/*****************************************************************
+ * 
+ * COMPILAR:
+ * g++ teste.cpp -o prog `pkg-config --libs --cflags  gtk+-3.0`
+ * 
+*****************************************************************/
+
+//BIBLIOTECAS
 #include <gtk/gtk.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -5,51 +21,44 @@
 #include <stdbool.h>
 #include <ctype.h>
 
+
+//PATHS DOS ARQUIVOS 
 #define file1 "./med.txt"
 #define arduino "./arduino/arduino.ino"
 
 
-//ATUALIZAR LISTA
-
-/****
- *  g_signal_connect(entry,"activate",G_CALLBACK(button_clicked),entry);  //press enter event
- *  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(toggle),true);
- * *********/
-
-// COMPILAR:
-
-// g++ teste.cpp -o prog `pkg-config --libs --cflags  gtk+-3.0`
-
+//as informacoes dos medicamentos sao gerenciadas por meio da struct:
 struct medicamento
 {
     char nomemed[50];
     char nomecom[50];
     char tipo[30];
     int qtdd;
-    //podem ser escolhidos varios horarios...
-    //alocacao dinamica..
-    int *hora;  // a medida que forem escolhidos horarios serao alocados mais espacos de memoria...
+
+    int *hora;  //como podem ser escolhidos varios horarios foi utilizada alocacao dinamica
     int *min;
-    int qh; //quantidade de horarios escolhidos
-    int dia[8]; //booleana, 1-7 corresponde aos dias da semana dom-sab
+    int qh; //armazena a quantidade de horarios fornecida
+
+    int dia[8]; //booleana ->  1-7 corresponde aos dias da semana dom-sab, a posicao 0 nao eh utilizada
 
 };
 
-char hrs[100];
+struct medicamento med;  //usada para o medicamento que for adicionado 
 
-int remqual;
+//usada pela funcao Armazenar() para armazenar todos os medicamentos do arquivo texto
+struct medicamento *adicionados; 
 
-int adicionar = 0;
 
-struct medicamento med;  //variavel global
+char hrs[100]; //os horarios do medicamento que sera adicionado sao obtidos por uma entry (string)
 
-struct medicamento *adicionados;   //usada pela funcao Armazenar()
+int remqual;  //numero do medicamento que sera removido
 
-int Lista (GtkWidget *grid, GtkWidget *label);
+int adicionar = 0;  //parametro que cordena a ataulizacao da interface principal
 
-void Adicionar(GtkWidget *button, gpointer window);
 
-void ButtonClicked (GtkWidget *entry, GtkWidget *toggle);
+int Lista (GtkWidget *grid, GtkWidget *label); // lista medimentos do arquivo texto
+
+void Adicionar(GtkWidget *button, gpointer window); // dialog - interface para adicionar medicamento
 
 void NomeMed (GtkWidget *toggle, GtkWidget *entry);
 
@@ -67,7 +76,10 @@ int Busca ();
 
 void Salvar ();
 
-void Remover(GtkWidget *button, gpointer window);
+void ButtonClicked (GtkWidget *entry, GtkWidget *toggle); // permite interacao por meio de ENTER 
+
+
+void Remover(GtkWidget *button, gpointer window); // dialog - interface para remover medicamento
 
 int ListaRemover (GtkWidget *grid, GtkWidget **radio, GtkWidget *space);
 
@@ -75,7 +87,11 @@ void RemoverQual(GtkWidget **radio, int num);
 
 void Removendo(int num);
 
-void Sair (GtkWidget *button, GtkWidget *window);
+
+void Sair (GtkWidget *button, GtkWidget *window); //sair do programa
+
+
+/**** FUNCOES RELACIONADAS AO ARDUINO ****/
 
 void Arduino();
 
@@ -83,9 +99,11 @@ void Tom(int *tom, int i);
 
 void Cor(int *cor, int i);
 
-int ArmazenarStruct();  
+int ArmazenarStruct();  //armazena todos os medicamentos do arquivo texto (alocacao dinamica) 
 
 void UploadArduino();
+
+/****************************************/
 
 
 int main(int argc, char *argv[])
@@ -133,7 +151,6 @@ int main(int argc, char *argv[])
     
     gtk_container_add(GTK_CONTAINER(window),grid);
 
-    //gtk_widget_set_size_request(window,480, 680);
 
     gtk_window_set_title(GTK_WINDOW(window),"DESPREOCUPE-SE");
 
@@ -141,6 +158,9 @@ int main(int argc, char *argv[])
 
     gtk_widget_show_all(window);  //show all widgets
     gtk_main();  //starts main loop
+
+
+    //QUANDO UM MEDICAMENTO FOR ADICIONADO OU REMOVIDO A GUI INICIAL DEVE SER ATUALIZADA:
 
     if(adicionar == 1){
         //printf("aqui\n");
@@ -152,7 +172,8 @@ int main(int argc, char *argv[])
     return 0;
 }
 
-int Lista (GtkWidget *grid, GtkWidget *label){
+int Lista (GtkWidget *grid, GtkWidget *label){  //listagem dos medicamentos no arquivo texto
+                                                //eh apresentada na interface inicial
 
     char busca[50];
     char nome[50];
@@ -192,12 +213,11 @@ int Lista (GtkWidget *grid, GtkWidget *label){
                 comercial[j] = toupper(comercial[j]);
             }
 
-            //strcat(etiqueta,"• ");
             strcat(etiqueta,nome);
             strcat(etiqueta,"• ");
             strcat(etiqueta,comercial);
             label = gtk_label_new(etiqueta);
-            //gtk_label_set_text(GTK_LABEL(label),etiqueta);
+            
             gtk_grid_attach(GTK_GRID(grid),label,0,i,1,1); 
             i++;
             label = gtk_label_new("");
@@ -221,13 +241,14 @@ int Lista (GtkWidget *grid, GtkWidget *label){
     fclose(Arq);
 }
 
-void ButtonClicked (GtkWidget *entry, GtkWidget *toggle){
+void ButtonClicked (GtkWidget *entry, GtkWidget *toggle){  //permite que ao inves de clicar no botao ok
+                                                           //seja usada a tecla enter
 
     gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(toggle),true);
 
 }
 
-void Adicionar(GtkWidget *button, gpointer window){
+void Adicionar(GtkWidget *button, gpointer window){  //INTERFACE GRAFICA PARA ADICIONAR = DIALOG
 
     int argc;
     char **argv;
@@ -236,7 +257,6 @@ void Adicionar(GtkWidget *button, gpointer window){
     GtkWidget *entry[4], *radio[4], *label, *but[7], *space, *toggle;
 
     dialog = gtk_dialog_new_with_buttons("NOVO MEDICAMENTO",GTK_WINDOW(window),GTK_DIALOG_MODAL,("_CONCLUIR"),GTK_RESPONSE_ACCEPT,("_CANCELAR"),GTK_RESPONSE_REJECT,NULL); 
-                                                  // dialog parent                                                      //as many buttons as you need
     
     
     content_area = gtk_dialog_get_content_area(GTK_DIALOG(dialog));
@@ -345,123 +365,96 @@ void Adicionar(GtkWidget *button, gpointer window){
 
     gint response = gtk_dialog_run(GTK_DIALOG(dialog));
 
-    if(response == GTK_RESPONSE_ACCEPT){
+    if(response == GTK_RESPONSE_ACCEPT){  //atualizar interface inicial...
         adicionar = 1;
-        //printf("%d",adicionar);
         Salvar ();
-        //gtk_widget_destroy(dialog);
         gtk_main_quit();
-        //main(argc,argv);
-        //g_print("OK\n");
     }
-    //else
-    //    g_print("Cancel\n");
 
     gtk_widget_destroy(dialog);
 }
 
-void NomeMed (GtkWidget *toggle, GtkWidget *entry){
+void NomeMed (GtkWidget *toggle, GtkWidget *entry){  //salvar na struct o nome popular
 
     if(gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(toggle)))
     {
-        //printf("Toogle button activated\n");
         strcpy(med.nomemed,gtk_entry_get_text(GTK_ENTRY(entry)));
         strcat(med.nomemed,"\n");
-        //printf("%s %s\n",gtk_entry_get_text(GTK_ENTRY(entry)),med.nomemed);
     }
 
 }
 
-void NomeCom (GtkWidget *toggle, GtkWidget *entry){
+void NomeCom (GtkWidget *toggle, GtkWidget *entry){ //salvar na struct o nome comercial
 
     if(gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(toggle)))
     {
-        //printf("Toogle button activated\n");
         strcpy(med.nomecom,gtk_entry_get_text(GTK_ENTRY(entry)));
         strcat(med.nomecom,"\n");
-        //printf("%s %s\n",gtk_entry_get_text(GTK_ENTRY(entry)),med.nomecom);
     }
 
 }
 
-void Tipo (GtkWidget *toggle, GtkWidget **radios){
+void Tipo (GtkWidget *toggle, GtkWidget **radios){ //salvar na struct o tipo de dosagem
 
     if(gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(radios[0]))){ 
-            //printf("The 1 button is active\n");
             sprintf(med.tipo,"mL");
     }
     if(gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(radios[1]))){ 
-            //printf("The 2 button is active\n");
             sprintf(med.tipo,"comprimido");
     }
     if(gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(radios[2]))){ 
-            //printf("The 3 button is active\n");
             sprintf(med.tipo,"spray");
     }
     if(gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(radios[3]))){ 
-            //printf("The 4 button is active\n");
             sprintf(med.tipo,"unidade");
     }
 
 }
 
-void Quantidade (GtkWidget *toggle, GtkWidget *entry){
+void Quantidade (GtkWidget *toggle, GtkWidget *entry){ //salvar na struct a dosagem
 
     int qtdd;
 
     if(gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(toggle)))
     {
-        //printf("Toogle button activated\n");
         sscanf(gtk_entry_get_text(GTK_ENTRY(entry)),"%d",&qtdd);
         med.qtdd = qtdd;
-        //printf("%d\n",med.qtdd);
     }
 
 }
 
-void Dia (GtkWidget *toggle, GtkWidget **checks){
+void Dia (GtkWidget *toggle, GtkWidget **checks){ //salvar na struct os dias
 
     if(gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(checks[0]))){ 
-            //printf("dom\n");
             med.dia[1] = 1;
     }
     if(gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(checks[1]))){ 
-            //printf("seg\n");
             med.dia[2] = 1;
     }
     if(gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(checks[2]))){ 
-            //printf("ter\n");
             med.dia[3] = 1;
     }
     if(gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(checks[3]))){ 
-            //printf("quar\n");
             med.dia[4] = 1;
     }
     if(gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(checks[4]))){ 
-            //printf("quin\n");
             med.dia[5] = 1;
     }
     if(gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(checks[5]))){ 
-            //printf("sex\n");
             med.dia[6] = 1;
     }
     if(gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(checks[6]))){ 
-            //printf("sab\n");
             med.dia[7] = 1;
     }
 
-    //printf("%d\n",med.dia[1]);
-
 }
 
-void Horario (GtkWidget *toggle, GtkWidget *entry){
+void Horario (GtkWidget *toggle, GtkWidget *entry){ //salvar na struct os horarios
 
     if(gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(toggle)))
     {
-        //printf("Toogle button activated\n");
         strcpy(hrs,gtk_entry_get_text(GTK_ENTRY(entry)));
         strcat(hrs,"@");
-        //printf("%s %s\n",gtk_entry_get_text(GTK_ENTRY(entry)),hrs);
     }
 
 }
@@ -482,41 +475,18 @@ void Salvar (){
         exit(0); 
     }
 
-    fprintf(Arq,"#%d\n",n);  //ID do novo med    /*usar busca para determinar numero do remedio*/
-    fprintf(Arq,"%s",med.nomemed);  //como foi usado gets, o \0 eh convertido em \n
+    fprintf(Arq,"#%d\n",n);  //ID do novo med determinado por Busca()
+    fprintf(Arq,"%s",med.nomemed);  
     fprintf(Arq,"%s",med.nomecom);
     fprintf(Arq,"%s\n",med.tipo);
     fprintf(Arq,"%d\n",med.qtdd);
-    //fprintf(Arq,"%f\n",med.quanto);
 
     for(i=1; i<8; i++){
         fprintf(Arq,"%d ",med.dia[i]);
     }
     fprintf(Arq,"\n");
     fprintf(Arq,"%s",hrs);
-    /*
-    for(i=0; i<s; i++){
-        if(i == s-1){
-            if(med.hora[i] < 10 && med.min[i] >= 10)
-                fprintf(Arq,"0%d:%d@",med.hora[i],med.min[i]);
-            if(med.hora[i] >= 10 && med.min[i] < 10)
-                fprintf(Arq,"%d:0%d@",med.hora[i],med.min[i]);
-            if(med.hora[i] < 10 && med.min[i] < 10)
-                fprintf(Arq,"0%d:0%d@",med.hora[i],med.min[i]);
-            if(med.hora[i] >= 10 && med.min[i] >= 10)
-                fprintf(Arq,"%d:%d@",med.hora[i],med.min[i]);
-        }
-        else{
-            if(med.hora[i] < 10 && med.min[i] >= 10)
-                fprintf(Arq,"0%d:%d ",med.hora[i],med.min[i]);
-            if(med.hora[i] >= 10 && med.min[i] < 10)
-                fprintf(Arq,"%d:0%d ",med.hora[i],med.min[i]);
-            if(med.hora[i] < 10 && med.min[i] < 10)
-                fprintf(Arq,"0%d:0%d ",med.hora[i],med.min[i]);
-            if(med.hora[i] >= 10 && med.min[i] >= 10)
-                fprintf(Arq,"%d:%d ",med.hora[i],med.min[i]);
-        }
-    }*/
+   
     fprintf(Arq,"\n");
 
 
@@ -557,8 +527,7 @@ void Remover(GtkWidget *button, gpointer window){
     GtkWidget *dialog, *content_area, *grid, *image;
     GtkWidget *radio[50], *space;
 
-    dialog = gtk_dialog_new_with_buttons("REMOVER MEDICAMENTO",GTK_WINDOW(window),GTK_DIALOG_MODAL,("_REMOVER"),GTK_RESPONSE_ACCEPT,("_CANCELAR"),GTK_RESPONSE_REJECT,NULL); 
-                                                  // dialog parent                                                      //as many buttons as you need
+    dialog = gtk_dialog_new_with_buttons("REMOVER MEDICAMENTO",GTK_WINDOW(window),GTK_DIALOG_MODAL,("_REMOVER"),GTK_RESPONSE_ACCEPT,("_CANCELAR"),GTK_RESPONSE_REJECT,NULL);                                                             
     
     
     content_area = gtk_dialog_get_content_area(GTK_DIALOG(dialog));
@@ -568,9 +537,8 @@ void Remover(GtkWidget *button, gpointer window){
     image = gtk_image_new_from_file("./images/remmeds.png");
     gtk_grid_attach(GTK_GRID(grid),image,0,0,8,1);
 
-    num = ListaRemover(grid,radio,space);
+    num = ListaRemover(grid,radio,space); //retorna numero de medicamentos ja adicionados
 
-    //printf("%d\n",num);
 
     gtk_container_add(GTK_CONTAINER(content_area),grid);
     
@@ -579,14 +547,11 @@ void Remover(GtkWidget *button, gpointer window){
 
     gint response = gtk_dialog_run(GTK_DIALOG(dialog));
 
-    if(response == GTK_RESPONSE_ACCEPT){
+    if(response == GTK_RESPONSE_ACCEPT){ //remover medicamento e atualizar GUI inicial...
         RemoverQual(radio,num);
         adicionar = 1;
         gtk_main_quit();
-        //g_print("OK\n");
     }
-    //else
-        //g_print("Cancel\n");
 
     gtk_widget_destroy(dialog);
 }
@@ -656,19 +621,16 @@ int ListaRemover (GtkWidget *grid, GtkWidget **radio, GtkWidget *space){
         gtk_grid_attach(GTK_GRID(grid),space,0,i,1,1); 
     }
 
-    //i++;
-    //printf("%d\n",num);
     return num;
 
     fclose(Arq);
 }
 
-void RemoverQual(GtkWidget **radio, int num){
+void RemoverQual(GtkWidget **radio, int num){ //determina qual medicamento foi selecionado para remocao
     int i, qual;
     for(i=1; i <= num; i++){
         if(gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(radio[i]))){
-                //printf("The %d button is active\n",i);
-                qual = i;
+            qual = i;
         }
     }
     Removendo(qual);
@@ -681,7 +643,7 @@ void Removendo(int num){
     char ref = '#';
     char fullref[5];
 
-    sprintf(fullref,"#%d\n",num);  //fgets adiciona \n ao final da string
+    sprintf(fullref,"#%d\n",num);  //sera comparado com string obtida com fgets que adiciona \n ao final da string
 
     FILE *Arq;
     FILE *Temp;
@@ -689,10 +651,11 @@ void Removendo(int num){
     Arq = fopen(file1,"r");
     Temp = fopen("replace.temp","w+");
 
-    while(fgets(buffer,100,Arq) != NULL){   /* usar feof? */
+    while(fgets(buffer,100,Arq) != NULL){   
         if(buffer[0] == ref){
-            if(strcmp(buffer,fullref)==0){ //se for o medicamento a ser deletado
-                for(i=0; i<7; i++){   // 6 (RETIREI QUANTO) infos por medicamento (nao serao salvos em TEMP, linha 0 a 5) a linha 6 eh do proximo
+            if(strcmp(buffer,fullref)==0){ //se for o medicamento a ser deletado...
+                for(i=0; i<7; i++){   // 6 infos por medicamento (nao sera salvo em TEMP de 0 a 5), 
+                                      // a info 6 sera do proximo medicamento e ja sera salva em temp
                     if(fgets(buffer,100,Arq)==NULL){
                         end = 1;
                         break;
@@ -716,14 +679,16 @@ void Removendo(int num){
 
     rename("replace.temp",file1);
 
-    //printf("Medicamento removido com sucesso\n");
-
 }
 
 void Sair (GtkWidget *button, GtkWidget *window){
     
     Arduino();
-/**********************************************************/
+
+
+/************************************* DIALOGO DE SAIDA *****************************************/
+
+//determinar se o Arduino UNO sera ou nao atualizado (depende de estar conectado ao computador)
 
     GtkWidget *dialog, *content_area, *grid, *label;
 
@@ -758,7 +723,7 @@ void Sair (GtkWidget *button, GtkWidget *window){
 
     gtk_widget_destroy(dialog);
 
-/****************************************************/
+/********************************************************************************************/
     gtk_main_quit();
 }
 
@@ -848,13 +813,17 @@ void Arduino(){
     fprintf(Ard,"\n");
 
     
-    count = ArmazenarStruct();  //quantos medicamentos tem
+    count = ArmazenarStruct();  //retorna quantos medicamentos tem
 
     
 
-    /************************* void loop *************************/
-
-    //medicamentos verificados de 10 em 10 minutos
+    /************************* void loop *************************
+     * 
+     * Os medicamentos sao verificados de 10 em 10 minutos, assim todos os medicamentos
+     * pertencentes a um mesmo intervalo de 10 minutos sao alertados consecutivamente.
+     * A verificacao eh realizada de 10 em 10 minutos para reduzir a atividade do Arduino
+     * e para que nenhum medicamento seja omitido, caso, por exemplo, o periodo de alerta
+     * de um medicamento se sobreponha ao horario de outro. */
 
 
     fprintf(Ard,"void loop()\n");
@@ -866,12 +835,12 @@ void Arduino(){
         char nome[50];
         char tipo[50];
 
-        #define button fprintf(Ard,"     if(digitalRead(BUT)==1){\n");fprintf(Ard,"      color(0,0,0);\n");fprintf(Ard,"      analogWrite(BUZ,0);\n");fprintf(Ard,"      lcd.clear();\n");fprintf(Ard,"      delay(5000);\n");fprintf(Ard,"      break;\n");fprintf(Ard,"     }\n");
-        //no button tem um delay de 5 segundos pra nao interromper outro remedio
+        //macro que contem a verificacao se o BOTAO foi ou nao pressionado
+        #define button fprintf(Ard,"     if(digitalRead(BUT)==1){\n");fprintf(Ard,"      color(0,0,0);\n");fprintf(Ard,"      analogWrite(BUZ,0);\n");fprintf(Ard,"      lcd.clear();\n");fprintf(Ard,"      delay(10000);\n");fprintf(Ard,"      break;\n");fprintf(Ard,"     }\n");
 
         for(i=0; i<count; i++){  //PARA CADA REMEDIO
 
-            fprintf(Ard,"  if("); //DIA DA SEMANA
+            fprintf(Ard,"  if("); //TESTAR DIAS DA SEMANA
                 tempd = 0;
                 for(d=1; d<=7; d++){
                     if(tempd == 0 && adicionados[i].dia[d] == 1){
@@ -885,7 +854,7 @@ void Arduino(){
                 }
             fprintf(Ard,"){\n");
 
-            fprintf(Ard,"   if("); //HORA E MINUTOS
+            fprintf(Ard,"   if("); //TESTAR HORAS E MINUTOS
                 for(h=0; h < adicionados[i].qh; h++){
                     if(h==0){
                         fprintf(Ard,"(horas == %d && %d >= minutos && %d < minutos+10)",adicionados[i].hora[h],adicionados[i].min[h],adicionados[i].min[h]);
@@ -896,9 +865,9 @@ void Arduino(){
                 }
             fprintf(Ard,"){\n");
 
-            //se esse eh o dia e horario do medicamento, ALARME
+            //se esse eh o dia e horario do medicamento, entao ALARME
             fprintf(Ard,"    int i;\n");
-            fprintf(Ard,"    for(i=0 ; i<5 ; i++){\n");
+            fprintf(Ard,"    for(i=0 ; i<10 ; i++){\n");
             button;
             fprintf(Ard,"     lcd.setCursor(0,0);\n");
 
@@ -948,7 +917,6 @@ void Arduino(){
             fprintf(Ard,"     delay(1000);\n");
             fprintf(Ard,"    }\n"); //END FOR alarme
             fprintf(Ard,"    color(0,0,0);\n");
-            fprintf(Ard,"    delay(3000);\n"); //garantir que a pessoa ja soltou o botao
             fprintf(Ard,"\n");
 
             fprintf(Ard,"   }\n");  //END IF hora e minutos
@@ -956,7 +924,7 @@ void Arduino(){
             fprintf(Ard,"  \n");
 
         }
-        fprintf(Ard," delay(60000);\n"); //delay de 1 min
+        fprintf(Ard," delay(60000);\n"); //delay de 1 minuto, para garantir que esse intervalo de 10 minutos nao seja repetido
 
         fprintf(Ard," }\n"); //END if(minutos%%10 == 0)
     fprintf(Ard,"}\n"); //END void loop
@@ -967,7 +935,9 @@ void Arduino(){
 
 }
 
-void Tom(int *tom, int i){  //i eh o numero do remedio em questao
+//define tons do buzzer diferentes para cada medicamento
+void Tom(int *tom, int i){  
+    //i eh o numero do remedio em questao
 
     int l0,l1,l2,l3;
 
@@ -1007,8 +977,9 @@ void Tom(int *tom, int i){  //i eh o numero do remedio em questao
     }
 }
 
-void Cor(int *cor, int n){ //0 = red, 1 = green, 2 = blue
-    int l0,l1,l2;
+//define cores diferentes para cada medicamento, objetivando uma distribuicao homogenea no espectro do arco iris
+void Cor(int *cor, int n){ 
+    int l0,l1,l2; //0 = red, 1 = green, 2 = blue
     int i,f,q;
     int r,g,b;
     l0 = (int)toupper(adicionados[n].nomecom[0]);
@@ -1042,10 +1013,8 @@ void Cor(int *cor, int n){ //0 = red, 1 = green, 2 = blue
 int ArmazenarStruct(){
 
     char busca[50];
-    //char temp[100];
     char ref = '#';
     int count = 0;
-    //int s; //size das strings
 
     adicionados = (medicamento*)malloc(0*sizeof(medicamento));
 
@@ -1063,26 +1032,16 @@ int ArmazenarStruct(){
             
 
             fscanf(Arq,"\n");
-            fgets(adicionados[count-1].nomemed,50,Arq);   // adiciona \n ao final da string
-            /*s = strlen(adicionados[count-1].nomemed);
-            adicionados[count-1].nomemed[s-1] = ' '; */
+            fgets(adicionados[count-1].nomemed,50,Arq);   
 
             fscanf(Arq,"\n");
-            fgets(adicionados[count-1].nomecom,50,Arq);  
-            /*s = strlen(adicionados[count-1].nomemed);
-            adicionados[count-1].nomecom[s-1] = ' ';*/   //eliminando \n do gets
+            fgets(adicionados[count-1].nomecom,50,Arq);
 
             fscanf(Arq,"\n");
             fgets(adicionados[count-1].tipo,50,Arq);  
-            /*s = strlen(adicionados[count-1].tipo);
-            adicionados[count-1].tipo[s-1] = ' ';*/  
 
             fscanf(Arq,"\n");
             fscanf(Arq,"%d",&adicionados[count-1].qtdd);
-
-            //RETIREI QUANTO TEM
-            //fscanf(Arq,"\n");
-            //fscanf(Arq,"%f",&adicionados[count-1].quanto);   
 
             /****** dias da semana ******/
             int d;
@@ -1097,7 +1056,7 @@ int ArmazenarStruct(){
             char temp = 'a';
             int q=0;
             adicionados[count-1].qh = 0;
-            while(temp != '@'){
+            while(temp != '@'){  // '@' indica fim dos horarios
                 adicionados[count-1].qh ++;
                 q = adicionados[count-1].qh;
                 adicionados[count-1].hora = (int*)realloc(adicionados[count-1].hora,q*sizeof(int));
@@ -1107,12 +1066,8 @@ int ArmazenarStruct(){
                 fscanf(Arq,"%d",&adicionados[count-1].min[q-1]);
                 fscanf(Arq,"%c",&temp);  // espaço ou '@'
             }
-            /** TESTE **
-            printf("\nremedio %s %d: %d",adicionados[count-1].nomemed,count,q);
-            printf("\n%d:%d",adicionados[count-1].hora[q-1],adicionados[count-1].min[q-1]);
-            ***********/
 
-            fscanf(Arq," ");  //se não colocar o programa nao roda...
+            fscanf(Arq," ");  
             
             
         }
