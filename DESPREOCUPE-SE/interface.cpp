@@ -2,10 +2,6 @@
 
 //ORGANIZADOR DE MEDICAMENTOS
 
-//Alice Valenca De Lorenci
-//Jade Bortot De Paiva
-//Marianna 
-
 /*****************************************************************
  * 
  * COMPILAR:
