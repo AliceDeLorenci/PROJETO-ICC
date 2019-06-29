@@ -52,10 +52,10 @@ Diretivas para compilar o programa a apartir do terminal:
 		
 		
 		~$ cd Desktop/DESPREOCUPE-SE
-		
-    		~/Desktop/DESPREOCUPE-SE$ g++ interface.cpp -o prog `pkg-config --libs --cflags  gtk+-3.0`
-		
-    		~/Desktop/DESPREOCUPE-SE$ ./prog
+
+		~/Desktop/DESPREOCUPE-SE$ g++ interface.cpp -o prog `pkg-config --libs --cflags  gtk+-3.0`
+
+		~/Desktop/DESPREOCUPE-SE$ ./prog
 
 
 
