@@ -2,7 +2,7 @@
 
 ## SISTEMA OPERACIONAL
 
-**Linux** (Ubunto 18.04)
+**Linux** (Ubuntu 18.04)
 
 
 ## INSTALAÇÕES NECESSÁRIAS
